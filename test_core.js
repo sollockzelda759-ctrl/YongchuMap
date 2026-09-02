@@ -290,11 +290,45 @@ async function runTests() {
   console.log('  isSettled已解除:', !store.isSettled('debug_msg_777') ? '✓' : '✗');
   console.log('');
 
+  // ── 测试14：宿主删除事件 ID 与 chat index 不一致（例如删除4楼，宿主传3） ──
+  console.log('【测试14】宿主删除事件 ID 与 chat index 不一致容错');
+  store.setPhysicalLocation({ id: 'jiujia_zhaidi', name: '旧家宅邸', world_id: 'yongchu', city_id: 'yongan' });
+  const locBefore14 = store.getState().physical_state.location_name;
+
+  // 14.1 结算在 4 楼 (比如原始消息 index=4)
+  const simContent14 = '<scene>地点：东市主街</scene>\n<map_event>\naction: arrive\nname: 东市主街\n</map_event>';
+  await settlement.settle({
+    messageId: 4,
+    messageContent: simContent14,
+    sourceMessageId: 3,
+    generationId: 'gen_del_test'
+  });
+  console.log('  4楼已结算:', store.isSettled(4) ? '✓' : '✗');
+  console.log('  位置变更至东市主街:', store.getState().physical_state.location_name === '东市主街' ? '✓' : '✗');
+
+  // 14.2 模拟宿主删除了 4 楼后，事件传参为剩余消息的新末尾索引 3
+  // 此时 window.SillyTavern.getContext().chat 只有 0, 1, 2, 3 四条消息
+  global.window.SillyTavern.getContext = () => ({
+    chat: [
+      { message_id: 0, is_user: true, mes: 'm0' },
+      { message_id: 1, is_user: false, mes: 'm1' },
+      { message_id: 2, is_user: true, mes: 'm2' },
+      { message_id: 3, is_user: true, mes: 'm3' }
+    ]
+  });
+
+  // 触发 onMessageDeleted(3)
+  const rollRes14 = settlement.onMessageDeleted(3);
+  console.log('  触发删除回滚成功:', rollRes14.success ? '✓' : '✗');
+  console.log('  4楼结算已回滚 (isSettled(4) === false):', !store.isSettled(4) ? '✓' : '✗');
+  console.log('  位置真实恢复回旧家宅邸:', store.getState().physical_state.location_name === locBefore14 ? '✓' : '✗');
+  console.log('');
+
   // ── 总结 ──
   console.log('========== 测试总结 ==========');
   console.log('  地点总数:', registry.getTotalLocationCount());
   console.log('  schema版本:', store.getState().schema_version);
-  console.log('  所有13项核心单元与宿主合同测试全部通过！');
+  console.log('  所有14项核心单元与宿主合同测试全部通过！');
   console.log('==============================');
 }
 

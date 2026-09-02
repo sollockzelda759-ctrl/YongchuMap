@@ -121,10 +121,63 @@ export default class SettlementEngine {
   }
 
   // 删除消息：回滚对应结算
+  // 支持两层检索：
+  // 1. 若 messageId 精确匹配已结算楼层，直接回滚该楼层；
+  // 2. 若宿主事件传入的是删除后剩余的新末尾索引（例如原4楼被删，宿主发3），
+  //    则自动在当前 chat 消息列表中扫描，查找哪些已结算过的 messageId 已经不存在于当前 chat 数组（或超出了当前最大楼层），
+  //    并从后往前将其安全回滚恢复快照。
   onMessageDeleted(messageId) {
-    if (this.store.isSettled(messageId)) {
+    if (messageId !== null && messageId !== undefined && this.store.isSettled(messageId)) {
       return this.rollback(messageId);
     }
+
+    // 第二层容错：检查结算索引中是否存在大于当前最大楼层或不在 chat 列表中的孤立结算记录
+    try {
+      const state = this.store.getState();
+      const settledMsgIds = Object.keys(state.settlement_index || {});
+      if (settledMsgIds.length > 0) {
+        let currentChatMaxIndex = null;
+        let existingMsgIds = null;
+
+        if (typeof window !== 'undefined' && window.SillyTavern) {
+          const ctx = window.SillyTavern.getContext();
+          if (ctx && ctx.chat && Array.isArray(ctx.chat)) {
+            currentChatMaxIndex = ctx.chat.length - 1;
+            existingMsgIds = new Set();
+            ctx.chat.forEach((m, idx) => {
+              existingMsgIds.add(String(idx));
+              if (m && m.message_id !== undefined) existingMsgIds.add(String(m.message_id));
+              if (m && m.id !== undefined) existingMsgIds.add(String(m.id));
+            });
+          }
+        }
+
+        // 按结算历史从后往前找到第一个需要回滚的记录
+        for (let i = state.settlement_history.length - 1; i >= 0; i--) {
+          const rec = state.settlement_history[i];
+          if (rec && !rec.rolled_back && rec.message_id !== null && rec.message_id !== undefined) {
+            const mIdStr = String(rec.message_id);
+            const mIdNum = Number(rec.message_id);
+
+            // 条件 A: 在现有 chat 列表中不存在
+            const missingInChat = existingMsgIds && !existingMsgIds.has(mIdStr);
+            // 条件 B: 数字索引大于当前最大有效楼层
+            const exceedsMax = !isNaN(mIdNum) && (
+              (currentChatMaxIndex !== null && mIdNum > currentChatMaxIndex) ||
+              (typeof messageId === 'number' && mIdNum > messageId)
+            );
+
+            if (missingInChat || exceedsMax) {
+              console.log('[YongchuMap] 发现已删除楼层的结算记录, 自动触发回滚: messageId=' + rec.message_id);
+              return this.rollback(rec.message_id);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[YongchuMap] onMessageDeleted 孤立检索异常:', e.message);
+    }
+
     return { success: true, action: 'no_settlement_to_clean' };
   }
 

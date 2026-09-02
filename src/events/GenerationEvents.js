@@ -153,16 +153,18 @@ export default class GenerationEvents {
       });
     }
 
-    // ── MESSAGE_DELETED：删除消息时回滚对应结算 ──
-    if (ET.MESSAGE_DELETED) {
-      this._addListener(ET.MESSAGE_DELETED, function(data) {
-        const messageId = self._resolveMessageId(data);
-        console.log('[YongchuMap] MESSAGE_DELETED, messageId=' + messageId);
-        if (messageId !== null && messageId !== undefined) {
-          self.settlement.onMessageDeleted(messageId);
-        }
-      });
-    }
+  // ── MESSAGE_DELETED：删除消息时回滚对应结算 ──
+  // 注意：SillyTavern/TauriTavern 的 MESSAGE_DELETED 事件在消息被从 chat 数组切除后触发，
+  // 传来的参数可能是被删除消息的原始索引、messageId，或删除后末尾的新索引/当前选中的消息。
+  // 因此，若直接传入的 messageId 在结算索引中，优先直接回滚；
+  // 若未直接命中，说明传入的是删除后残留的新末尾索引，应自动在 settlement_history / index 中比对并回滚孤立/已被删楼层的结算。
+  if (ET.MESSAGE_DELETED) {
+    this._addListener(ET.MESSAGE_DELETED, function(data) {
+      const messageId = self._resolveMessageId(data);
+      console.log('[YongchuMap] MESSAGE_DELETED 触发, 原始参数=' + JSON.stringify(data) + ', 解析 messageId=' + messageId);
+      self.settlement.onMessageDeleted(messageId);
+    });
+  }
 
     // ── CHARACTER_CHANGED：切角色卡重建context ──
     if (ET.CHARACTER_CHANGED) {
@@ -191,23 +193,16 @@ export default class GenerationEvents {
     return null;
   }
 
-  // ── 解析messageId（参数可能是数字或对象） ──
+  // ── 解析 messageId（支持数字、数字字符串、对象结构如 { id, messageId, message_id }） ──
   _resolveMessageId(param) {
     if (typeof param === 'number') return param;
     if (typeof param === 'string' && !isNaN(Number(param))) return Number(param);
     if (param && typeof param === 'object') {
-      return param.message_id || param.messageId || param.id || null;
+      if (param.message_id !== undefined && param.message_id !== null) return this._resolveMessageId(param.message_id);
+      if (param.messageId !== undefined && param.messageId !== null) return this._resolveMessageId(param.messageId);
+      if (param.id !== undefined && param.id !== null) return this._resolveMessageId(param.id);
     }
-    // fallback: 从chat数组找最后一条assistant消息
-    const ctx = this._getContext();
-    if (ctx && ctx.chat && Array.isArray(ctx.chat)) {
-      for (let i = ctx.chat.length - 1; i >= 0; i--) {
-        if (ctx.chat[i].is_user === false && ctx.chat[i].message_id !== undefined) {
-          return ctx.chat[i].message_id;
-        }
-      }
-    }
-    return null;
+    return param !== undefined && param !== null ? param : null;
   }
 
   // ── 获取sourceMessageId（最新用户消息） ──
