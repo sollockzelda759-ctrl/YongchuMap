@@ -1,0 +1,10 @@
+{
+  "name": "yongchu-map",
+  "version": "0.1.2",
+  "description": "永初地图系统 - 独立地图扩展",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test_core.js"
+  }
+}

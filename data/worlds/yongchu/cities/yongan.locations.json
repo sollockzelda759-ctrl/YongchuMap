@@ -1,0 +1,1083 @@
+{
+  "meta": {
+    "source": "永初大陆角色卡内置地图",
+    "city": "永安城",
+    "coordinate_system": "东西12里(x:0~12), 南北10里(y:0~10), 1单位≈1里≈500米",
+    "total_locations": 69,
+    "extracted_at": "2026-09-02T09:37:32.651Z"
+  },
+  "locations": [
+    {
+      "id": "dongshi_zhujie",
+      "name": "东市主街",
+      "x": 9.3,
+      "y": 5.6,
+      "width": 2.4,
+      "height": 0.8,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "永安最繁华的商业街，绸缎铺银楼首饰铺林立，人流如织",
+      "sub_areas": [
+        "旧氏布庄",
+        "沈氏绸缎铺",
+        "旧家铺面"
+      ]
+    },
+    {
+      "id": "changle_xiang",
+      "name": "长乐巷",
+      "x": 8.3,
+      "y": 6.4,
+      "width": 1.8,
+      "height": 1,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "偏静的宽巷，世家大宅聚居，青石板路干净整洁",
+      "sub_areas": [
+        "旧家宅邸",
+        "旧氏药局"
+      ]
+    },
+    {
+      "id": "wangfu_jie",
+      "name": "王府街",
+      "x": 8,
+      "y": 7.8,
+      "width": 2.8,
+      "height": 1.2,
+      "type": "outdoor",
+      "category": "royal",
+      "atmosphere": "宗室王府聚居区，门第森严，护卫巡逻",
+      "sub_areas": [
+        "靖王府",
+        "瑞王府",
+        "宝檀阁"
+      ]
+    },
+    {
+      "id": "fuchun_fang",
+      "name": "富春坊",
+      "x": 10.6,
+      "y": 7.8,
+      "width": 1.3,
+      "height": 1.1,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "巨贾豪门居所，三进重院带大花园",
+      "sub_areas": [
+        "薛府"
+      ]
+    },
+    {
+      "id": "anping_jie",
+      "name": "安平街",
+      "x": 10.8,
+      "y": 5.3,
+      "width": 0.9,
+      "height": 0.5,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "偏街，古玩字画与典当行集中",
+      "sub_areas": [
+        "宋家古玩",
+        "宋家典当"
+      ]
+    },
+    {
+      "id": "yanhuo_xiang",
+      "name": "烟火巷",
+      "x": 8.3,
+      "y": 5.7,
+      "width": 0.5,
+      "height": 0.35,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "深巷，市井烟火气浓，小食铺林立",
+      "sub_areas": [
+        "林家面铺"
+      ]
+    },
+    {
+      "id": "jiujia_houxiang",
+      "name": "旧家后巷",
+      "x": 9.1,
+      "y": 6.5,
+      "width": 0.35,
+      "height": 0.25,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "旧家宅邸后巷，僻静少人",
+      "sub_areas": [
+        "陆记包子铺"
+      ]
+    },
+    {
+      "id": "sifang_fang",
+      "name": "四方坊",
+      "x": 11,
+      "y": 5.6,
+      "width": 0.9,
+      "height": 0.7,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "单独划出一坊，各国商人常驻，异域风情浓厚",
+      "sub_areas": [
+        "梁国西域货栈",
+        "陈国海货铺",
+        "楚国漆器行"
+      ]
+    },
+    {
+      "id": "jiujia_zhaidi",
+      "name": "旧家宅邸",
+      "x": 8.6,
+      "y": 6.7,
+      "width": 1.1,
+      "height": 0.8,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "三进大宅带东西跨院后花园，仆役百人，世家气象",
+      "sub_areas": [
+        "前院",
+        "正院",
+        "东跨院",
+        "西跨院",
+        "后院"
+      ]
+    },
+    {
+      "id": "jiushi_buzhuang",
+      "name": "旧氏布庄",
+      "x": 9.6,
+      "y": 5.8,
+      "width": 0.55,
+      "height": 0.4,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "高档绸缎成衣定制，黑底金字门头，熏香浆水味",
+      "sub_areas": [
+        "前堂展布",
+        "后院绣坊",
+        "密库"
+      ]
+    },
+    {
+      "id": "jiushi_yaoju",
+      "name": "旧氏药局",
+      "x": 8.3,
+      "y": 7.5,
+      "width": 0.45,
+      "height": 0.35,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "纯正厚重草药苦香，三开间大铺面，后带炮制跨院",
+      "sub_areas": [
+        "前堂看诊抓药",
+        "后院炮制坊",
+        "恒温库房"
+      ]
+    },
+    {
+      "id": "jingwang_fu",
+      "name": "靖王府",
+      "x": 8.2,
+      "y": 8,
+      "width": 0.9,
+      "height": 0.8,
+      "type": "indoor",
+      "category": "royal",
+      "atmosphere": "苏知远府邸，门第森严，老派体面与祖制",
+      "sub_areas": [
+        "前院",
+        "正堂",
+        "内宅",
+        "花园"
+      ]
+    },
+    {
+      "id": "ruiwang_fu",
+      "name": "瑞王府",
+      "x": 9.5,
+      "y": 8.1,
+      "width": 0.9,
+      "height": 0.8,
+      "type": "indoor",
+      "category": "royal",
+      "atmosphere": "苏知敬府邸，常办诗会茶会结交清流",
+      "sub_areas": [
+        "前院",
+        "正堂",
+        "内宅",
+        "花园"
+      ]
+    },
+    {
+      "id": "baotan_ge",
+      "name": "宝檀阁",
+      "x": 8,
+      "y": 8.9,
+      "width": 0.4,
+      "height": 0.35,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "瑞王府暗产，极品香料与名贵木材专营行",
+      "sub_areas": [
+        "前堂",
+        "后院库房"
+      ]
+    },
+    {
+      "id": "xue_fu",
+      "name": "薛府",
+      "x": 10.8,
+      "y": 8,
+      "width": 1,
+      "height": 0.8,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "四大家族薛家，三进重院带大花园，门面阔气清雅",
+      "sub_areas": [
+        "前院",
+        "正堂",
+        "内宅",
+        "私家库房",
+        "核账静室"
+      ]
+    },
+    {
+      "id": "linjia_mianpu",
+      "name": "林家面铺",
+      "x": 8.8,
+      "y": 5.8,
+      "width": 0.28,
+      "height": 0.25,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "林粟家祖传老店，面香四溢，市井烟火",
+      "sub_areas": [
+        "铺面",
+        "后厨"
+      ]
+    },
+    {
+      "id": "luji_baozipu",
+      "name": "陆记包子铺",
+      "x": 9.5,
+      "y": 6.4,
+      "width": 0.22,
+      "height": 0.2,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "陆宽隐姓埋名的包子摊，热气腾腾",
+      "sub_areas": [
+        "铺面"
+      ]
+    },
+    {
+      "id": "shenshi_chouduanpu",
+      "name": "沈氏绸缎铺",
+      "x": 10.5,
+      "y": 5.7,
+      "width": 0.5,
+      "height": 0.35,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "沈书言娘家产业，市井熟客路线",
+      "sub_areas": [
+        "铺面",
+        "库房"
+      ]
+    },
+    {
+      "id": "wenchang_jie",
+      "name": "文昌街",
+      "x": 3.3,
+      "y": 4,
+      "width": 2,
+      "height": 0.6,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "文教一条街，书局笔墨铺林立，文人学子往来",
+      "sub_areas": [
+        "谢家书局",
+        "谢家笔墨铺",
+        "灵家书铺",
+        "松风斋"
+      ]
+    },
+    {
+      "id": "jinxiu_jie",
+      "name": "锦绣街",
+      "x": 1.6,
+      "y": 3.6,
+      "width": 1.6,
+      "height": 0.9,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "织染工坊区，染坊绸庄连片，空气中飘着染料味",
+      "sub_areas": [
+        "杜府",
+        "杜氏大绸庄",
+        "织染工坊群"
+      ]
+    },
+    {
+      "id": "nanhuo_dadao",
+      "name": "南货大道",
+      "x": 1.3,
+      "y": 3,
+      "width": 2.2,
+      "height": 0.55,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "物资集散地，大型货栈仓库林立，车马络绎",
+      "sub_areas": [
+        "旧家货栈×4"
+      ]
+    },
+    {
+      "id": "taichang_jie",
+      "name": "太常街",
+      "x": 4.3,
+      "y": 3.1,
+      "width": 2.8,
+      "height": 0.6,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "传统文官世家聚居区，太常寺官署所在，清静雅致",
+      "sub_areas": [
+        "谢府",
+        "云家宅邸",
+        "灵家旧宅",
+        "太常寺"
+      ]
+    },
+    {
+      "id": "jingzhao_fu",
+      "name": "京兆府",
+      "x": 4.8,
+      "y": 6.3,
+      "width": 1,
+      "height": 0.75,
+      "type": "indoor",
+      "category": "official",
+      "atmosphere": "主管永安城地方政务，门前鸣冤鼓石狮子，带刀衙役守卫",
+      "sub_areas": [
+        "前院升堂大堂",
+        "东跨院六曹",
+        "西跨院京兆狱"
+      ]
+    },
+    {
+      "id": "facao_yamen",
+      "name": "法曹衙门",
+      "x": 4.6,
+      "y": 7.2,
+      "width": 0.5,
+      "height": 0.4,
+      "type": "indoor",
+      "category": "official",
+      "atmosphere": "普通案件卷宗归档，罚银收缴",
+      "sub_areas": [
+        "办公大堂",
+        "卷宗库"
+      ]
+    },
+    {
+      "id": "mingjing_tang",
+      "name": "明镜堂",
+      "x": 5.7,
+      "y": 7.1,
+      "width": 0.5,
+      "height": 0.4,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "灵家自营，律令书馆与状师行会，暗中收集世家罪证",
+      "sub_areas": [
+        "前堂律令书馆",
+        "中院状师行会",
+        "后院密档库"
+      ]
+    },
+    {
+      "id": "zongren_fu",
+      "name": "宗人府",
+      "x": 6.5,
+      "y": 7.2,
+      "width": 0.5,
+      "height": 0.4,
+      "type": "indoor",
+      "category": "royal",
+      "atmosphere": "靖王苏知远掌管，管宗室玉牒与婚丧审批",
+      "sub_areas": [
+        "办公大堂",
+        "玉牒库"
+      ]
+    },
+    {
+      "id": "xie_fu",
+      "name": "谢府",
+      "x": 4.6,
+      "y": 3.3,
+      "width": 0.7,
+      "height": 0.55,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "谢清衡府邸，中书侍郎，书香门第",
+      "sub_areas": [
+        "前院",
+        "正堂",
+        "内宅",
+        "书房"
+      ]
+    },
+    {
+      "id": "yunjia_zhaidi",
+      "name": "云家宅邸",
+      "x": 5.5,
+      "y": 3.3,
+      "width": 0.6,
+      "height": 0.5,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "太常寺少卿云致远府邸",
+      "sub_areas": [
+        "前院",
+        "正堂",
+        "内宅"
+      ]
+    },
+    {
+      "id": "lingjia_jiuzhai",
+      "name": "灵家旧宅",
+      "x": 6.3,
+      "y": 3.3,
+      "width": 0.6,
+      "height": 0.5,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "御史大夫灵知玄府邸，清贵言官世家",
+      "sub_areas": [
+        "前院",
+        "正堂",
+        "内宅",
+        "书房"
+      ]
+    },
+    {
+      "id": "taichang_si",
+      "name": "太常寺",
+      "x": 7.1,
+      "y": 3.3,
+      "width": 0.55,
+      "height": 0.45,
+      "type": "indoor",
+      "category": "official",
+      "atmosphere": "管宗庙祭祀礼典仪程的清水衙署",
+      "sub_areas": [
+        "办公大堂",
+        "礼器库"
+      ]
+    },
+    {
+      "id": "du_fu",
+      "name": "杜府",
+      "x": 1.8,
+      "y": 3.8,
+      "width": 0.85,
+      "height": 0.7,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "四大家族杜家，前店后宅连带大片织染工坊群",
+      "sub_areas": [
+        "前院",
+        "正堂",
+        "内宅",
+        "织染工坊"
+      ]
+    },
+    {
+      "id": "dushi_dachouzhuang",
+      "name": "杜氏大绸庄",
+      "x": 2.7,
+      "y": 3.7,
+      "width": 0.55,
+      "height": 0.45,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "永安最大的布匹与生丝批发总行",
+      "sub_areas": [
+        "前堂",
+        "库房"
+      ]
+    },
+    {
+      "id": "xiejia_shuju",
+      "name": "谢家书局",
+      "x": 3.6,
+      "y": 4.1,
+      "width": 0.5,
+      "height": 0.35,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "四家大书局，把持永安七成书市",
+      "sub_areas": [
+        "铺面",
+        "库房"
+      ]
+    },
+    {
+      "id": "xiejia_bimopu",
+      "name": "谢家笔墨铺",
+      "x": 4.2,
+      "y": 4.1,
+      "width": 0.32,
+      "height": 0.25,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "八间笔墨铺，文房四宝",
+      "sub_areas": [
+        "铺面"
+      ]
+    },
+    {
+      "id": "lingjia_shupu",
+      "name": "灵家书铺",
+      "x": 4.6,
+      "y": 4.1,
+      "width": 0.28,
+      "height": 0.22,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "两间，专印言官奏疏与律法注解",
+      "sub_areas": [
+        "铺面"
+      ]
+    },
+    {
+      "id": "songfeng_zhai",
+      "name": "松风斋",
+      "x": 3.3,
+      "y": 4.5,
+      "width": 0.32,
+      "height": 0.25,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "瑞王府暗产，孤本字画铺与隐秘雅贷行",
+      "sub_areas": [
+        "铺面",
+        "内室"
+      ]
+    },
+    {
+      "id": "jiujia_huozhan",
+      "name": "旧家货栈",
+      "x": 1.6,
+      "y": 3.1,
+      "width": 1,
+      "height": 0.45,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "四座，控制大宗物资出入城中转",
+      "sub_areas": [
+        "库房",
+        "管事房"
+      ]
+    },
+    {
+      "id": "xueshi_tonghui_guifang",
+      "name": "薛氏通汇柜坊",
+      "x": 4.8,
+      "y": 5.3,
+      "width": 0.6,
+      "height": 0.45,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "四大家族薛家，永安最大民间钱庄，大额会票承兑过桥周转各国汇兑",
+      "sub_areas": [
+        "前堂",
+        "后院金库"
+      ]
+    },
+    {
+      "id": "wanjia_wantong_qianzhuang",
+      "name": "万家万通钱庄",
+      "x": 5.6,
+      "y": 5.3,
+      "width": 0.5,
+      "height": 0.4,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "万通钱庄总号",
+      "sub_areas": [
+        "前堂",
+        "库房"
+      ]
+    },
+    {
+      "id": "wanjia_wanfeng_dangpu",
+      "name": "万家万丰当铺",
+      "x": 6.3,
+      "y": 5.3,
+      "width": 0.5,
+      "height": 0.4,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "大宗死当行六家活当铺十家",
+      "sub_areas": [
+        "铺面",
+        "库房"
+      ]
+    },
+    {
+      "id": "baijia_yaohang",
+      "name": "白家药行",
+      "x": 4.8,
+      "y": 4.6,
+      "width": 0.5,
+      "height": 0.35,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "白氏药材总行两家，永安七成名贵药材被白家控制",
+      "sub_areas": [
+        "铺面",
+        "库房"
+      ]
+    },
+    {
+      "id": "baijia_yiguan",
+      "name": "白家医馆",
+      "x": 5.5,
+      "y": 4.6,
+      "width": 0.4,
+      "height": 0.3,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "百年医馆五家",
+      "sub_areas": [
+        "诊堂",
+        "药柜"
+      ]
+    },
+    {
+      "id": "changfeng_jie",
+      "name": "长风街",
+      "x": 0.7,
+      "y": 5.3,
+      "width": 2.2,
+      "height": 1.7,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "路面宽阔，武行镖局车马行集中，江湖武人往来",
+      "sub_areas": [
+        "严府",
+        "长风镖局",
+        "严家车马行"
+      ]
+    },
+    {
+      "id": "chashi_jie",
+      "name": "茶市街",
+      "x": 1.4,
+      "y": 3.3,
+      "width": 1.3,
+      "height": 0.5,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "城西南茶叶交易市场，茶铺茶室集中",
+      "sub_areas": [
+        "叶家茶叶铺",
+        "叶家清净茶室"
+      ]
+    },
+    {
+      "id": "xishi",
+      "name": "西市",
+      "x": 0.7,
+      "y": 3.6,
+      "width": 2.2,
+      "height": 1.3,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "城西核心商业区，武行铁匠铺茶摊酒肆混杂，人员混杂",
+      "sub_areas": [
+        "各类市井商铺"
+      ]
+    },
+    {
+      "id": "yan_fu",
+      "name": "严府",
+      "x": 0.9,
+      "y": 5.9,
+      "width": 1.3,
+      "height": 1,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "四大家族严家，占地极广大宅院，内设演武校场大型马厩亲信镖师通铺",
+      "sub_areas": [
+        "前院",
+        "演武校场",
+        "正堂",
+        "内宅",
+        "马厩"
+      ]
+    },
+    {
+      "id": "changfeng_biaoju",
+      "name": "长风镖局",
+      "x": 2,
+      "y": 5.4,
+      "width": 0.7,
+      "height": 0.5,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "护送四大家族与永安大宗商货陆运",
+      "sub_areas": [
+        "前堂",
+        "后院镖师通铺",
+        "马厩"
+      ]
+    },
+    {
+      "id": "yanjia_chemhang",
+      "name": "严家车马行",
+      "x": 0.7,
+      "y": 4.9,
+      "width": 0.5,
+      "height": 0.4,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "四处，调配货运辎重与大车队",
+      "sub_areas": [
+        "铺面",
+        "车场",
+        "马厩"
+      ]
+    },
+    {
+      "id": "yejia_chayepu",
+      "name": "叶家茶叶铺",
+      "x": 1.2,
+      "y": 3.4,
+      "width": 0.32,
+      "height": 0.28,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "两间茶叶铺",
+      "sub_areas": [
+        "铺面",
+        "库房"
+      ]
+    },
+    {
+      "id": "yejia_chashi",
+      "name": "叶家清净茶室",
+      "x": 2.8,
+      "y": 3.4,
+      "width": 0.28,
+      "height": 0.22,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "两处清净茶室",
+      "sub_areas": [
+        "茶室"
+      ]
+    },
+    {
+      "id": "huangcheng",
+      "name": "皇城",
+      "x": 4,
+      "y": 8.2,
+      "width": 4,
+      "height": 1.8,
+      "type": "indoor",
+      "category": "royal",
+      "atmosphere": "昭国皇宫，外朝内廷，守卫森严，非诏莫入",
+      "sub_areas": [
+        "承天门",
+        "太极殿",
+        "凝翠阁",
+        "承乾宫",
+        "慈宁宫",
+        "中书台"
+      ]
+    },
+    {
+      "id": "zhaoguo_huanggong",
+      "name": "昭国皇宫",
+      "x": 5.3,
+      "y": 8.6,
+      "width": 1.4,
+      "height": 1,
+      "type": "indoor",
+      "category": "royal",
+      "atmosphere": "皇宫核心建筑群，坐北朝南中轴对称",
+      "sub_areas": [
+        "外朝太极殿",
+        "内廷凝翠阁承乾宫慈宁宫"
+      ]
+    },
+    {
+      "id": "zhongshu_tai",
+      "name": "中书台",
+      "x": 7,
+      "y": 8.8,
+      "width": 0.5,
+      "height": 0.4,
+      "type": "indoor",
+      "category": "royal",
+      "atmosphere": "旧灵汐旧冷月当值处，起草诏令",
+      "sub_areas": [
+        "值房",
+        "文书库"
+      ]
+    },
+    {
+      "id": "luoshui_beijie",
+      "name": "洛水北街",
+      "x": 3.3,
+      "y": 2.8,
+      "width": 3.8,
+      "height": 0.4,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "洛水北岸沿河街道，酒楼泊位仓库林立",
+      "sub_areas": [
+        "凌霄阁",
+        "旧家泊位",
+        "临江仓库"
+      ]
+    },
+    {
+      "id": "luoshui_nanjie",
+      "name": "洛水南街",
+      "x": 4.3,
+      "y": 1.7,
+      "width": 4.2,
+      "height": 0.35,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "洛水南岸沿河街道，漕运码头酒坊风月场所集中",
+      "sub_areas": [
+        "魏府水云坞",
+        "魏家漕运",
+        "陆家酒坊",
+        "严家漕运"
+      ]
+    },
+    {
+      "id": "jinshui_heloujiao",
+      "name": "金水合流角",
+      "x": 3.8,
+      "y": 1.5,
+      "width": 0.6,
+      "height": 0.35,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "偏僻水巷深处，两条水道交汇处，隐秘僻静",
+      "sub_areas": [
+        "四宜堂"
+      ]
+    },
+    {
+      "id": "wasi_goulan_jie",
+      "name": "瓦肆勾栏街",
+      "x": 6.9,
+      "y": 1.7,
+      "width": 1.1,
+      "height": 0.45,
+      "type": "outdoor",
+      "category": "brothel",
+      "atmosphere": "瓦肆勾栏街区，酒楼茶馆密集，夜市繁华",
+      "sub_areas": [
+        "醉春楼"
+      ]
+    },
+    {
+      "id": "pingkang_xiang",
+      "name": "平康巷",
+      "x": 8.2,
+      "y": 1.7,
+      "width": 0.55,
+      "height": 0.35,
+      "type": "outdoor",
+      "category": "brothel",
+      "atmosphere": "洛水南岸偏巷，风月场所集中",
+      "sub_areas": [
+        "春风阁"
+      ]
+    },
+    {
+      "id": "luoshui_yeishi",
+      "name": "洛水夜市",
+      "x": 2.8,
+      "y": 2.7,
+      "width": 5.4,
+      "height": 0.45,
+      "type": "outdoor",
+      "category": "street",
+      "atmosphere": "沿河摆摊交易至四更，中秋有洛水灯会，灯火通明",
+      "sub_areas": [
+        "各类夜市摊贩"
+      ]
+    },
+    {
+      "id": "lingxiao_ge",
+      "name": "凌霄阁",
+      "x": 5,
+      "y": 2.9,
+      "width": 0.55,
+      "height": 0.45,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "旧家自营，永安最高民间建筑，旧家消息集散地，五层加平顶天台",
+      "sub_areas": [
+        "一楼散座",
+        "二三楼雅座",
+        "四五楼密间",
+        "顶楼摘星台"
+      ]
+    },
+    {
+      "id": "jiujia_bowei",
+      "name": "旧家泊位",
+      "x": 3.3,
+      "y": 2.8,
+      "width": 0.7,
+      "height": 0.22,
+      "type": "outdoor",
+      "category": "outdoor",
+      "atmosphere": "专运泊位三处，连带临江仓库六间",
+      "sub_areas": [
+        "泊位",
+        "仓库"
+      ]
+    },
+    {
+      "id": "weifu_shuiyunwu",
+      "name": "魏府水云坞",
+      "x": 5.3,
+      "y": 1.6,
+      "width": 0.85,
+      "height": 0.55,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "四大家族魏家，依洛水而筑的深水宅邸，自带私家卸货泊位内河暗渠管事排房",
+      "sub_areas": [
+        "前院",
+        "正堂",
+        "内宅",
+        "私家泊位",
+        "暗渠"
+      ]
+    },
+    {
+      "id": "weijia_caoyun_zongtang",
+      "name": "魏家漕运总堂",
+      "x": 6.6,
+      "y": 1.6,
+      "width": 0.65,
+      "height": 0.45,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "控管沿江三十六处大仓与千名纤夫水手",
+      "sub_areas": [
+        "总堂",
+        "私仓群"
+      ]
+    },
+    {
+      "id": "lujia_jiufang",
+      "name": "陆家酒坊",
+      "x": 4.8,
+      "y": 1.8,
+      "width": 0.32,
+      "height": 0.28,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "酿酒作坊两处，临街铺面三间",
+      "sub_areas": [
+        "作坊",
+        "铺面"
+      ]
+    },
+    {
+      "id": "yanjia_caoyun_tangkou",
+      "name": "严家漕运堂口",
+      "x": 6,
+      "y": 1.3,
+      "width": 0.38,
+      "height": 0.28,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "帮工堂口五处",
+      "sub_areas": [
+        "堂口",
+        "库房"
+      ]
+    },
+    {
+      "id": "siyi_tang",
+      "name": "四宜堂",
+      "x": 4.3,
+      "y": 1.4,
+      "width": 0.38,
+      "height": 0.32,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "四姓同盟议事枢纽，表面不起眼的私家静心茶楼，内设四印合一密厅",
+      "sub_areas": [
+        "前堂",
+        "密厅"
+      ]
+    },
+    {
+      "id": "zuichun_lou",
+      "name": "醉春楼",
+      "x": 7.4,
+      "y": 1.5,
+      "width": 0.45,
+      "height": 0.35,
+      "type": "indoor",
+      "category": "brothel",
+      "atmosphere": "三层大木楼带后院，花三娘经营，只卖艺不卖身",
+      "sub_areas": [
+        "一楼大堂",
+        "二楼雅座",
+        "三楼头牌居所",
+        "后院"
+      ]
+    },
+    {
+      "id": "chunfeng_ge",
+      "name": "春风阁",
+      "x": 8.3,
+      "y": 1.8,
+      "width": 0.38,
+      "height": 0.3,
+      "type": "indoor",
+      "category": "brothel",
+      "atmosphere": "两层砖木楼，纯粹皮肉生意，认钱不认人",
+      "sub_areas": [
+        "一楼大堂隔间",
+        "二楼留宿厢房"
+      ]
+    },
+    {
+      "id": "xixin_chazhuang",
+      "name": "洗心茶庄",
+      "x": -1.8,
+      "y": 0.4,
+      "width": 1,
+      "height": 0.7,
+      "type": "indoor",
+      "category": "indoor",
+      "atmosphere": "西郊半山腰，依山势而建的连片竹楼木亭，极度隐蔽，灵家统筹朝堂舆论指挥部",
+      "sub_areas": [
+        "外围品茶雅座",
+        "内院清流议事厅",
+        "后山秘径"
+      ]
+    }
+  ]
+}

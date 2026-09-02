@@ -1,0 +1,24 @@
+{
+  "name": "yongchu-map",
+  "display_name": "永初地图系统",
+  "description": "独立地图扩展：世界→国家→城市三级地图，距离计算，旅行管理，动态地点，持久状态注入。不依赖数据库/MVU，支持多世界数据包。",
+  "version": "0.1.2",
+  "author": "永初大陆开发组",
+  "js": "index.js",
+  "loading_order": 10,
+  "minimum_client_version": "1.12.0",
+  "dependencies": [],
+  "optionalDependencies": [],
+  "features": [
+    "地图状态独立存储（按worldId/characterId/chatId/groupId隔离）",
+    "physical_state与intent_state分离",
+    "持久map_state注入（injectPrompts, once:false, position:in_chat）",
+    "generation_ended后置结算（幂等，支持Swipe/删除回滚）",
+    "地点注册系统（支持多世界数据包，namespace防覆盖）",
+    "距离与路线计算",
+    "旅行计划与进度管理",
+    "动态地点（ephemeral/session/persistent）",
+    "candidate候选地点机制",
+    "Location与Entity分离"
+  ]
+}
