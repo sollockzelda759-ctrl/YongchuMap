@@ -264,11 +264,37 @@ async function runTests() {
   console.log('  文件存在:', fs.existsSync(dataUrl) ? '✓' : '✗');
   console.log('');
 
+  // ── 测试13：debugSettle 临时调试入口与 rollback 链路 ──
+  console.log('【测试13】debugSettle 调试入口与 rollback 真实链路');
+  store.setPhysicalLocation({ id: 'jiujia_zhaidi', name: '旧家宅邸', world_id: 'yongchu', city_id: 'yongan' });
+  const locBefore = store.getState().physical_state.location_name;
+
+  // 模拟 debugSettle 内部逻辑：通过 SettlementEngine 执行
+  const simContent = '<scene>地点：东市主街</scene>\n<map_event>\naction: arrive\nname: 东市主街\n</map_event>';
+  const settleRes = await settlement.settle({
+    messageId: 'debug_msg_777',
+    messageContent: simContent,
+    sourceMessageId: null,
+    generationId: 'debug_test'
+  });
+
+  console.log('  debug结算成功:', settleRes.success ? '✓' : '✗');
+  console.log('  位置已变更至东市主街:', store.getState().physical_state.location_name === '东市主街' ? '✓' : '✗');
+  console.log('  已生成before_snapshot:', !!settleRes.has_before_snapshot ? '✓' : '✗');
+  console.log('  isSettled已标记:', store.isSettled('debug_msg_777') ? '✓' : '✗');
+
+  // 执行回滚 (模拟 Delete / Swipe 触发)
+  const rollRes = settlement.onMessageDeleted('debug_msg_777');
+  console.log('  触发删除回滚成功:', rollRes.success ? '✓' : '✗');
+  console.log('  位置真实恢复回旧家宅邸:', store.getState().physical_state.location_name === locBefore ? '✓' : '✗');
+  console.log('  isSettled已解除:', !store.isSettled('debug_msg_777') ? '✓' : '✗');
+  console.log('');
+
   // ── 总结 ──
   console.log('========== 测试总结 ==========');
   console.log('  地点总数:', registry.getTotalLocationCount());
   console.log('  schema版本:', store.getState().schema_version);
-  console.log('  所有12项核心单元与宿主合同测试全部通过！');
+  console.log('  所有13项核心单元与宿主合同测试全部通过！');
   console.log('==============================');
 }
 

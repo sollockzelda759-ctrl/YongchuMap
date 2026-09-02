@@ -330,8 +330,39 @@ class YongchuMap {
   async triggerSettlement(messageId, messageContent) {
     return this.settlementEngine.settle({
       messageId: messageId || ('manual_' + Date.now()),
+      messageContent: messageContent,
       sourceMessageId: null, generationId: 'manual',
       isError: false, isAborted: false
+    });
+  }
+
+  // ── [临时调试入口] 实机生命周期验收专用 ──
+  // 后续 Map Core v1 实机验收完成后可随时移除或关闭
+  async debugSettle(messageId, locationIdOrName) {
+    if (messageId === undefined || messageId === null) {
+      console.warn('[YongchuMap.debugSettle] 缺少 messageId 参数');
+      return { success: false, error: '缺少 messageId' };
+    }
+    const state = this.store.getState();
+    const worldId = state.physical_state.world_id || this.activeWorldPackId;
+    const cityId = state.physical_state.city_id || this.getActiveWorldPack().defaultCityId;
+
+    // 查找目标地点
+    let loc = this.registry.getLocationInCity(worldId, cityId, locationIdOrName) ||
+              this.registry.findLocationByName(worldId, cityId, locationIdOrName, state.dynamic_locations) ||
+              this.routeEngine.dynamicLocations.find(function(l) { return l.id === locationIdOrName || l.name === locationIdOrName; });
+
+    const targetName = loc ? loc.name : locationIdOrName;
+    const simulatedContent = '<scene>地点：' + targetName + '</scene>\n<map_event>\naction: arrive\nname: ' + targetName + '\n</map_event>';
+
+    console.log('[YongchuMap.debugSettle] 触发调试结算: messageId=' + messageId + ', 目标地点=' + targetName);
+    return this.settlementEngine.settle({
+      messageId: messageId,
+      messageContent: simulatedContent,
+      sourceMessageId: null,
+      generationId: 'debug_' + Date.now(),
+      isError: false,
+      isAborted: false
     });
   }
 

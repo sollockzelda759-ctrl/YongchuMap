@@ -59,8 +59,10 @@ export default class SettlementEngine {
       // 1. 保存结算前快照（用于rollback）
       const beforeSnapshot = this.store.saveBeforeSnapshot();
 
-      // 2. 读取消息内容
-      const messageContent = await this._getMessageContent(messageId);
+      // 2. 读取消息内容 (允许 context.messageContent 显式传入用于调试或指定结算内容)
+      const messageContent = (context.messageContent !== undefined && context.messageContent !== null)
+        ? context.messageContent
+        : await this._getMessageContent(messageId);
 
       // 3. 执行结算
       const result = this._doSettlement(messageContent);
