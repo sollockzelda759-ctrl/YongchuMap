@@ -207,26 +207,55 @@ async function runTests() {
   console.log('  切回原group正确:', s10a.physical_state.location_name === '群聊地点' ? '✓' : '✗');
   console.log('');
 
-  // ── 测试11：injectPrompts合同规范 ──
-  console.log('【测试11】injectPrompts合同规范 (id:map_state, position:in_chat, should_scan:false)');
-  let capturedPrompts = null;
-  let capturedOptions = null;
-  global.injectPrompts = function(prompts, options) {
-    capturedPrompts = prompts;
-    capturedOptions = options;
-    return { uninject: () => { capturedPrompts = null; } };
+  // ── 测试11：宿主原生 setExtensionPrompt 优先与后备机制 ──
+  console.log('【测试11】宿主原生 setExtensionPrompt 优先与后备机制');
+  let extensionPromptsRegistry = {};
+  const mockSetExtensionPrompt = function(id, content, position, depth, scan, role) {
+    if (!id) return;
+    if (!content) {
+      delete extensionPromptsRegistry[id];
+    } else {
+      extensionPromptsRegistry[id] = { content, position, depth, scan, role };
+    }
   };
+
+  // 11.1 测试原生 setExtensionPrompt 注入
+  global.window.SillyTavern.getContext = () => ({
+    setExtensionPrompt: mockSetExtensionPrompt,
+    extension_prompt_types: { IN_CHAT: 1 },
+    extension_prompt_roles: { SYSTEM: 0 }
+  });
 
   store.setContext('yongchu', 'test_char', 'test_chat');
   store.setPhysicalLocation({ id: 'jiujia_zhaidi', name: '旧家宅邸', world_id: 'yongchu', city_id: 'yongan' });
-  mapContext.inject();
 
-  console.log('  injectPrompts调用成功:', !!capturedPrompts ? '✓' : '✗');
-  console.log('  prompt id === "map_state":', capturedPrompts?.[0]?.id === 'map_state' ? '✓' : '✗');
-  console.log('  prompt position === "in_chat":', capturedPrompts?.[0]?.position === 'in_chat' ? '✓' : '✗');
-  console.log('  prompt should_scan === false:', capturedPrompts?.[0]?.should_scan === false ? '✓' : '✗');
-  console.log('  options once === false:', capturedOptions?.once === false ? '✓' : '✗');
-  console.log('  uninject()正常执行:', (mapContext.uninject(), capturedPrompts === null) ? '✓' : '✗');
+  const injectRes1 = mapContext.inject();
+  console.log('  原生setExtensionPrompt注入成功:', injectRes1.success && injectRes1.mode === 'native' ? '✓' : '✗');
+  console.log('  prompt id === "yongchu_map_state":', !!extensionPromptsRegistry['yongchu_map_state'] ? '✓' : '✗');
+  console.log('  position === 1 (IN_CHAT):', extensionPromptsRegistry['yongchu_map_state']?.position === 1 ? '✓' : '✗');
+  console.log('  role === 0 (SYSTEM):', extensionPromptsRegistry['yongchu_map_state']?.role === 0 ? '✓' : '✗');
+  console.log('  scan === false:', extensionPromptsRegistry['yongchu_map_state']?.scan === false ? '✓' : '✗');
+
+  // 11.2 同ID原地覆盖测试（位置变化后再次inject）
+  store.setPhysicalLocation({ id: 'dongshi_zhujie', name: '东市主街', world_id: 'yongchu', city_id: 'yongan' });
+  const injectRes2 = mapContext.inject();
+  console.log('  同一ID直接覆盖无重复:', (Object.keys(extensionPromptsRegistry).length === 1 && extensionPromptsRegistry['yongchu_map_state'].content.includes('东市主街')) ? '✓' : '✗');
+
+  // 11.3 uninject / destroy 清空测试
+  mapContext.uninject();
+  console.log('  uninject()清空原生prompt:', !extensionPromptsRegistry['yongchu_map_state'] ? '✓' : '✗');
+
+  // 11.4 测试无原生API时的 injectPrompts 后备
+  delete global.window.SillyTavern.getContext;
+  let fallbackPrompts = null;
+  global.injectPrompts = function(prompts, options) {
+    fallbackPrompts = prompts;
+    return { uninject: () => { fallbackPrompts = null; } };
+  };
+  const injectResFallback = mapContext.inject();
+  console.log('  无原生API时自动切换TavernHelper后备:', (injectResFallback.success && injectResFallback.mode === 'tavern_helper') ? '✓' : '✗');
+  mapContext.uninject();
+  console.log('  后备uninject()正常清空:', fallbackPrompts === null ? '✓' : '✗');
   console.log('');
 
   // ── 测试12：import.meta.url数据路径验证 ──

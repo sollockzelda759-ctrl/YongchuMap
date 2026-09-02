@@ -134,13 +134,9 @@ class YongchuMap {
     const eventsRegistered = this.events.register();
     console.log('[YongchuMap] 事件注册: ' + (eventsRegistered ? '成功' : '失败'));
 
-    // 6. 注入初始map_state
-    if (typeof injectPrompts === 'function') {
-      const injectResult = this.mapContext.inject();
-      console.log('[YongchuMap] 初始map_state注入:', JSON.stringify(injectResult));
-    } else {
-      console.warn('[YongchuMap] injectPrompts不可用');
-    }
+    // 6. 注入初始map_state (优先SillyTavern原生setExtensionPrompt)
+    const injectResult = this.mapContext.inject();
+    console.log('[YongchuMap] 初始map_state注入结果:', JSON.stringify(injectResult));
 
     // 7. UI初始化
     this.panel.init();
