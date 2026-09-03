@@ -9,6 +9,7 @@ import RouteEngine from './src/core/RouteEngine.js';
 import MapPanel from './src/ui/MapPanel.js';
 import MapDataLoader from './src/data/MapDataLoader.js';
 import YonganCityMapRenderer from './src/ui/YonganCityMapRenderer.js';
+import StrategicMapRenderer from './src/ui/StrategicMapRenderer.js';
 
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
@@ -24,7 +25,7 @@ console.log = (...args) => {
   nativeConsoleLog(...args);
 };
 
-console.log('========== YongchuMap UI v1 与 Map Data v1 联动测试开始 ==========');
+console.log('========== YongchuMap UI v2 与 Map Data v1 联动测试开始 ==========');
 
 // 1. 准备核心依赖
 global.localStorage = {
@@ -309,7 +310,124 @@ async function runTests() {
   renderer.destroy();
   console.log('  CityMapRenderer 安全销毁: ✓');
 
-  console.log('\n【测试9】独立可拖拽浮动按钮生命周期与防误触');
+  console.log('\n【测试9】Map Visual v2 世界/国家舆图与选中反馈');
+  class FakeElement {
+    constructor(tag) {
+      this.tag = tag;
+      this.children = [];
+      this.attributes = {};
+      this.listeners = {};
+      this.style = { setProperty: (key, value) => { this.style[key] = value; } };
+      this.className = '';
+      this.textContent = '';
+      this._innerHTML = '';
+      this.classList = {
+        add: (...names) => {
+          const all = new Set(this.className.split(/\s+/).filter(Boolean));
+          names.forEach(name => all.add(name));
+          this.className = [...all].join(' ');
+        },
+        remove: (...names) => {
+          const remove = new Set(names);
+          this.className = this.className.split(/\s+/).filter(name => name && !remove.has(name)).join(' ');
+        },
+        toggle: (name, force) => {
+          const all = new Set(this.className.split(/\s+/).filter(Boolean));
+          const enabled = force === undefined ? !all.has(name) : !!force;
+          if (enabled) all.add(name); else all.delete(name);
+          this.className = [...all].join(' ');
+          return enabled;
+        },
+        contains: name => this.className.split(/\s+/).includes(name)
+      };
+    }
+    set innerHTML(value) { this._innerHTML = String(value); if (value === '') this.children = []; }
+    get innerHTML() { return this._innerHTML; }
+    appendChild(child) { this.children.push(child); child.parentNode = this; return child; }
+    setAttribute(key, value) { this.attributes[key] = String(value); }
+    getAttribute(key) { return this.attributes[key] ?? null; }
+    addEventListener(type, handler) { this.listeners[type] = handler; }
+    removeEventListener(type) { delete this.listeners[type]; }
+    remove() {
+      if (this.parentNode) this.parentNode.children = this.parentNode.children.filter(child => child !== this);
+    }
+    querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
+    querySelectorAll(selector) {
+      const results = [];
+      const matches = node => {
+        if (selector.startsWith('.')) return node.className.split(/\s+/).includes(selector.slice(1));
+        if (selector.startsWith('#')) return node.id === selector.slice(1);
+        const attr = selector.match(/^\[([^=\]]+)(?:="?([^"\]]+)"?)?\]$/);
+        if (attr) return Object.hasOwn(node.attributes, attr[1]) && (attr[2] === undefined || node.attributes[attr[1]] === attr[2]);
+        return node.tag === selector;
+      };
+      const walk = node => node.children.forEach(child => {
+        if (matches(child)) results.push(child);
+        walk(child);
+      });
+      walk(this);
+      return results;
+    }
+    getBoundingClientRect() { return { left: 0, top: 0, width: 700, height: 500 }; }
+  }
+  const visualDocument = {
+    createElement: tag => new FakeElement(tag),
+    createElementNS: (_namespace, tag) => new FakeElement(tag)
+  };
+  global.document = visualDocument;
+
+  const worldMount = new FakeElement('div');
+  const worldRenderer = new StrategicMapRenderer({ container: worldMount, mode: 'world', worldData: worldRef.worldData });
+  worldRenderer.init();
+  const stateGlyphs = worldMount.querySelectorAll('.ycm-state-glyph').map(node => node.textContent);
+  assert.deepEqual(stateGlyphs, ['昭', '燕', '赵', '楚', '梁', '陈']);
+  assert.equal(worldMount.querySelectorAll('[data-nation-id]').length, 6);
+  assert.ok(!worldMount.querySelector('.ycm-strategic-surface').querySelectorAll('.ycm-state-glyph').some(node => node.textContent.startsWith('大')));
+  console.log('  世界地图六国仅渲染单字国号且六区可交互: ✓');
+
+  const nationMount = new FakeElement('div');
+  const nationRenderer = new StrategicMapRenderer({ container: nationMount, mode: 'nation', nationData: zhaoRef.nationData });
+  nationRenderer.init();
+  assert.equal(nationMount.querySelectorAll('[data-city-id]').length, 13);
+  assert.equal(nationMount.querySelectorAll('.ycm-nation-city-name').length, 13);
+  assert.ok(!nationMount.querySelector('.ycm-strategic-surface').querySelectorAll('.ycm-terrain-label').some(node => node.textContent === '昭'));
+  console.log('  昭国地图从正式数据渲染 13 城且无地形中央巨型国号: ✓');
+
+  const cityMount = new FakeElement('div');
+  const selectionRenderer = new YonganCityMapRenderer({
+    container: cityMount,
+    cityData: cityRef.cityData,
+    locations: locRef.locations,
+    currentLocationId: 'jiujia_zhaidi'
+  });
+  selectionRenderer._renderDrawer = () => {};
+  selectionRenderer.init();
+  selectionRenderer.focusLocation('changle_xiang');
+  const selectedMarker = cityMount.querySelectorAll('.ycm-map-marker').find(node => node.getAttribute('data-loc-id') === 'changle_xiang');
+  const currentMarker = cityMount.querySelectorAll('.ycm-map-marker').find(node => node.getAttribute('data-loc-id') === 'jiujia_zhaidi');
+  assert.ok(selectedMarker.classList.contains('is-selected'));
+  assert.ok(!currentMarker.classList.contains('is-selected'));
+  assert.ok(currentMarker.classList.contains('is-current-pos'));
+  assert.equal(selectionRenderer._selectedLocId, 'changle_xiang');
+  console.log('  选中地点蓝金高亮与红色当前位置保持独立: ✓');
+
+  const controlsEl = cityMount.querySelector('.ycm-map-controls');
+  assert.ok(controlsEl.innerHTML.includes('data-act="zoom-in"'));
+  assert.ok(controlsEl.innerHTML.includes('data-act="zoom-out"'));
+  assert.ok(controlsEl.innerHTML.includes('data-act="reset"'));
+  let invoked = [];
+  selectionRenderer.zoomIn = () => invoked.push('zoom-in');
+  selectionRenderer.zoomOut = () => invoked.push('zoom-out');
+  selectionRenderer.resetView = () => invoked.push('reset');
+  ['zoom-in', 'zoom-out', 'reset'].forEach(action => {
+    controlsEl.listeners.click({ target: { closest: () => ({ getAttribute: () => action }) } });
+  });
+  assert.deepEqual(invoked, ['zoom-in', 'zoom-out', 'reset']);
+  assert.ok(cssSource.includes('.ycm-map-controls') && cssSource.includes('flex-direction: row'));
+  console.log('  +、−、重置三控件完整存在、横排可见且全部绑定: ✓');
+  selectionRenderer.destroy();
+
+  console.log('\n【测试10】独立可拖拽浮动按钮生命周期与防误触');
   let storageState = {};
   global.localStorage = {
     getItem(k) { return storageState[k] || null; },
@@ -397,7 +515,7 @@ async function runTests() {
 
   if (failedChecks > 0) throw new Error(`${failedChecks} 项 UI 检查失败`);
   console.log('\n========== UI 与 Data 联动测试总结 ==========');
-  console.log('所有 9 项测试及关键断言全部通过！');
+  console.log('所有 10 项测试及关键断言全部通过！');
   console.log('============================================');
 }
 

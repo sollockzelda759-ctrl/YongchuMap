@@ -6,6 +6,7 @@
 
 import MapDataLoader from '../data/MapDataLoader.js';
 import YonganCityMapRenderer from './YonganCityMapRenderer.js';
+import StrategicMapRenderer from './StrategicMapRenderer.js';
 
 
 const UI_BTN_ID = 'yongchu-map-toggle-btn';
@@ -27,6 +28,7 @@ export default class MapPanel {
     this._btnElement = null;
     this._floatingBtnElement = null;
     this._cityMapRenderer = null;
+    this._strategicMapRenderer = null;
     this._floatDragCleanup = null;
 
     this._styleElement = null;
@@ -675,49 +677,27 @@ export default class MapPanel {
   }
 
   _renderWorldView(container) {
+    this._destroyCityRenderer();
     const bannerHtml = this._renderCurrentLocationBanner();
-    const nations = this._currentWorldRef?.worldData?.nations || [];
-
-    let cardsHtml = '';
-    nations.forEach(n => {
-      const hasDetail = !!n.nationalDataFile;
-      const tagText = hasDetail ? '疆域在览 · 可查' : '天下万邦';
-      const capitalDesc = n.capital ? `国都：${n.capital}` : '';
-      const summary = n.summary || n.desc || capitalDesc || '暂无简介';
-
-      cardsHtml += `
-        <div class="ycm-card" data-nation-id="${this._escapeHtml(n.id)}">
-          <div class="ycm-card-header">
-            <div class="ycm-card-title">${this._escapeHtml(n.fullName || n.name)} (${this._escapeHtml(n.name)})</div>
-            <span class="ycm-card-tag">${tagText}</span>
-          </div>
-          <div class="ycm-card-desc">${this._escapeHtml(summary)}</div>
-          <div class="ycm-card-footer">
-            <span>${hasDetail ? '查阅疆域城邑' : '详细地舆尚未绘制'}</span>
-            <span>→</span>
-          </div>
-        </div>
-      `;
-    });
-
     container.innerHTML = `
       ${bannerHtml}
-      <div style="margin-bottom: 12px; font-size: 13px; color: #d4af37; font-weight: 600;">
-        天下大势 · 诸国分野
-      </div>
-      <div class="ycm-grid">
-        ${cardsHtml}
-      </div>
+      <div id="ycm-strategic-map-mount" class="ycm-strategic-map-mount"></div>
     `;
-
-    const cards = container.querySelectorAll('.ycm-card');
-    cards.forEach(card => {
-      const nationId = card.getAttribute('data-nation-id');
-      card.addEventListener('click', () => this.navigateToNation(nationId));
+    this._destroyStrategicRenderer();
+    const mount = container.querySelector('#ycm-strategic-map-mount');
+    if (!mount) return;
+    this._strategicMapRenderer = new StrategicMapRenderer({
+      container: mount,
+      mode: 'world',
+      worldData: this._currentWorldRef?.worldData,
+      onNationClick: nationId => this.navigateToNation(nationId)
     });
+    this._strategicMapRenderer.init();
   }
 
   _renderNationView(container) {
+    this._destroyCityRenderer();
+    this._destroyStrategicRenderer();
     const nationRef = this._currentNationRef;
     const bannerHtml = this._renderCurrentLocationBanner();
     const fullName = nationRef?.nationMeta?.fullName || nationRef?.nationMeta?.name || '该国';
@@ -738,69 +718,42 @@ export default class MapPanel {
       return;
     }
 
-    const cities = nationRef.nationData?.cities || [];
-    let cardsHtml = '';
-
-    if (cities.length > 0) {
-      cities.forEach(c => {
-        const hasCityDetail = !!c.city_data_file;
-        const isCapital = nationRef.nationData?.capital_city_id === c.id;
-        const tagText = hasCityDetail ? '已接入地图引擎' : (isCapital ? '国都 (待勘绘)' : '要邑');
-        const desc = c.description || c.features || '暂无简介';
-
-        cardsHtml += `
-          <div class="ycm-card" data-city-id="${this._escapeHtml(c.id)}" style="${hasCityDetail ? '' : 'opacity:0.75;'}">
-            <div class="ycm-card-header">
-              <div class="ycm-card-title">${this._escapeHtml(c.name)}城 ${isCapital ? '👑' : ''}</div>
-              <span class="ycm-card-tag">${tagText}</span>
-            </div>
-            <div class="ycm-card-desc">${this._escapeHtml(desc)}</div>
-            <div class="ycm-card-footer">
-              <span>${hasCityDetail ? '点击查阅全城坊市与地点' : '详细城坊尚未绘制'}</span>
-              <span>→</span>
-            </div>
-          </div>
-        `;
-      });
-    } else {
-      cardsHtml = `
-        <div class="ycm-card" style="grid-column: 1 / -1; opacity: 0.85; cursor: default;">
-          <div class="ycm-card-header">
-            <div class="ycm-card-title">${this._escapeHtml(fullName)} 诸城</div>
-            <span class="ycm-card-tag">山河广阔</span>
-          </div>
-          <div class="ycm-card-desc">暂无可用城池数据。</div>
-        </div>
-      `;
-    }
-
     container.innerHTML = `
       ${bannerHtml}
-      <div style="margin-bottom: 12px; font-size: 13px; color: #d4af37; font-weight: 600;">
-        ${this._escapeHtml(fullName)} · 疆域城邑
-      </div>
-      <div class="ycm-grid">
-        ${cardsHtml}
-      </div>
+      <div id="ycm-strategic-map-mount" class="ycm-strategic-map-mount"></div>
     `;
-
-    const cityCards = container.querySelectorAll('[data-city-id]');
-    cityCards.forEach(card => {
-      const cityId = card.getAttribute('data-city-id');
-      card.addEventListener('click', () => this.navigateToCity(cityId));
+    const mount = container.querySelector('#ycm-strategic-map-mount');
+    if (!mount) return;
+    this._strategicMapRenderer = new StrategicMapRenderer({
+      container: mount,
+      mode: 'nation',
+      worldData: this._currentWorldRef?.worldData,
+      nationData: nationRef.nationData,
+      onCityClick: cityId => this.navigateToCity(cityId)
     });
+    this._strategicMapRenderer.init();
+  }
+
+  _destroyStrategicRenderer() {
+    if (!this._strategicMapRenderer) return;
+    this._strategicMapRenderer.destroy();
+    this._strategicMapRenderer = null;
+  }
+
+  _destroyCityRenderer() {
+    if (!this._cityMapRenderer) return;
+    this._cityMapRenderer.destroy();
+    this._cityMapRenderer = null;
   }
 
   _renderCityView(container) {
+    this._destroyStrategicRenderer();
     const bannerHtml = this._renderCurrentLocationBanner();
     const cityRef = this._currentCityRef;
     const cityName = cityRef?.cityMeta?.name || '本城';
 
     if (!cityRef || !cityRef.hasDetail) {
-      if (this._cityMapRenderer) {
-        this._cityMapRenderer.destroy();
-        this._cityMapRenderer = null;
-      }
+      this._destroyCityRenderer();
       container.innerHTML = `
         ${bannerHtml}
         <div class="ycm-empty-fallback">
@@ -829,9 +782,7 @@ export default class MapPanel {
 
     const mountPoint = container.querySelector('#ycm-city-map-mount');
     if (mountPoint) {
-      if (this._cityMapRenderer) {
-        this._cityMapRenderer.destroy();
-      }
+      this._destroyCityRenderer();
       this._cityMapRenderer = new YonganCityMapRenderer({
         container: mountPoint,
         cityData: cityData,
@@ -869,10 +820,8 @@ export default class MapPanel {
       try { this._floatDragCleanup(); } catch (_) {}
       this._floatDragCleanup = null;
     }
-    if (this._cityMapRenderer) {
-      try { this._cityMapRenderer.destroy(); } catch (_) {}
-      this._cityMapRenderer = null;
-    }
+    try { this._destroyCityRenderer(); } catch (_) {}
+    this._destroyStrategicRenderer();
     if (this._floatingBtnElement) {
       try { this._floatingBtnElement.remove(); } catch (_) {}
       this._floatingBtnElement = null;

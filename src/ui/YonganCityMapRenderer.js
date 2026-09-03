@@ -122,10 +122,12 @@ export default class YonganCityMapRenderer {
     // 2.4 控制器 (放大/缩小/重置)
     const controls = document.createElement('div');
     controls.className = 'ycm-map-controls';
+    controls.setAttribute('role', 'toolbar');
+    controls.setAttribute('aria-label', '地图视角控制');
     controls.innerHTML = `
-      <button type="button" class="ycm-map-ctrl-btn" data-act="zoom-in" title="放大">+</button>
-      <button type="button" class="ycm-map-ctrl-btn" data-act="zoom-out" title="缩小">-</button>
-      <button type="button" class="ycm-map-ctrl-btn" data-act="reset" title="重置视角">⊙</button>
+      <button type="button" class="ycm-map-ctrl-btn" data-act="zoom-in" title="放大" aria-label="放大地图">+</button>
+      <button type="button" class="ycm-map-ctrl-btn" data-act="zoom-out" title="缩小" aria-label="缩小地图">−</button>
+      <button type="button" class="ycm-map-ctrl-btn" data-act="reset" title="重置视角" aria-label="重置地图视角">⟳</button>
     `;
     viewport.appendChild(controls);
 
@@ -152,51 +154,92 @@ export default class YonganCityMapRenderer {
   }
 
   _generateBackgroundSvg() {
+    const northBlocks = [
+      [180, 165, 5, 3], [175, 250, 5, 3], [650, 165, 5, 3], [655, 255, 5, 3],
+      [260, 175, 4, 3], [270, 270, 4, 2], [690, 335, 5, 2]
+    ].map(args => this._buildingCluster(...args, true)).join('');
+    const southBlocks = [
+      [235, 480, 4, 2], [330, 500, 4, 2], [535, 485, 4, 2], [650, 500, 4, 2],
+      [240, 585, 3, 2], [450, 590, 4, 2], [650, 590, 3, 2]
+    ].map(args => this._buildingCluster(...args, false)).join('');
+    const palaceBuildings = [
+      [430, 175, 140, 38], [448, 230, 104, 32], [463, 278, 74, 27]
+    ].map(([x, y, w, h]) => this._palaceBuilding(x, y, w, h)).join('');
     return `
       <svg class="ycm-map-svg-bg" viewBox="0 0 1000 750" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="riverGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#1b4965" stop-opacity="0.8"/>
-            <stop offset="50%" stop-color="#2a6f97" stop-opacity="0.9"/>
-            <stop offset="100%" stop-color="#1b4965" stop-opacity="0.8"/>
+            <stop offset="0%" stop-color="#527c83"/>
+            <stop offset="50%" stop-color="#7fa2a0"/>
+            <stop offset="100%" stop-color="#496f78"/>
           </linearGradient>
-          <linearGradient id="wallGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#3d372e"/>
-            <stop offset="100%" stop-color="#231f1a"/>
+          <linearGradient id="cityPaper" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#b9a477"/>
+            <stop offset="45%" stop-color="#d2c49e"/>
+            <stop offset="100%" stop-color="#9e865d"/>
           </linearGradient>
-          <linearGradient id="mountainGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stop-color="#1c251f" stop-opacity="0.7"/>
-            <stop offset="100%" stop-color="#0e1410" stop-opacity="0.9"/>
-          </linearGradient>
+          <filter id="cityShadow"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#201a12" flood-opacity=".5"/></filter>
+          <pattern id="paperFibres" width="23" height="23" patternUnits="userSpaceOnUse">
+            <path d="M0 7 L23 4 M3 19 L19 22" stroke="#604c31" stroke-width=".6" opacity=".12"/>
+          </pattern>
         </defs>
-
-        <!-- 北部背景：景山山峦叠嶂 -->
-        <path d="M 80,120 Q 220,30 380,80 T 680,60 T 920,110 L 920,130 L 80,130 Z" fill="url(#mountainGrad)"/>
-        <path d="M 280,110 Q 480,20 620,90 L 620,130 L 280,130 Z" fill="#141c16" opacity="0.6"/>
-        <text x="500" y="70" fill="#6d8374" font-size="16" font-weight="700" letter-spacing="4" text-anchor="middle">景 山</text>
-
-        <!-- 永安城外城墙示意 (东西12里，南北10里，等比布局) -->
-        <rect x="140" y="90" width="720" height="600" rx="10" ry="10" fill="none" stroke="url(#wallGrad)" stroke-width="8"/>
-        <rect x="144" y="94" width="712" height="592" rx="8" ry="8" fill="none" stroke="#d4af37" stroke-width="1" stroke-opacity="0.4"/>
-
-        <!-- 皇城内城墙 (偏北中轴) -->
-        <rect x="380" y="140" width="240" height="200" fill="rgba(140,45,25,0.06)" stroke="#8c2d19" stroke-width="3" stroke-dasharray="6 3"/>
-
-        <!-- 中央主轴线：承天门大街 (贯通南北) -->
-        <line x1="500" y1="340" x2="500" y2="690" stroke="#8a7353" stroke-width="6" stroke-opacity="0.6"/>
-
-        <!-- 洛水穿城而过 (自西向东东西横贯) -->
-        <path d="M 80,390 C 250,380 400,410 500,400 C 620,390 780,415 950,400" fill="none" stroke="url(#riverGrad)" stroke-width="32" stroke-linecap="round"/>
-        <path d="M 80,390 C 250,380 400,410 500,400 C 620,390 780,415 950,400" fill="none" stroke="#48cae4" stroke-width="2" stroke-opacity="0.6" stroke-dasharray="8 6"/>
-        <text x="320" y="396" fill="#90e0ef" font-size="14" font-weight="700" letter-spacing="4">洛 水 ─── 自西向东穿城</text>
-
-        <!-- 金水支流汇流处 -->
-        <path d="M 410,480 Q 420,430 460,405" fill="none" stroke="#1b4965" stroke-width="14" stroke-linecap="round"/>
-
-        <!-- 城外西郊 -->
-        <path d="M 40,460 Q 90,440 120,530 T 40,680 Z" fill="#18221c" stroke="#2d4233" stroke-width="1.5"/>
+        <rect width="1000" height="750" fill="#7c7257"/>
+        <rect width="1000" height="750" fill="url(#paperFibres)"/>
+        <!-- 城外山林与护城河：均来自 city.json 的景山/护城河资料 -->
+        <path d="M55 130 Q125 42 205 121 Q275 18 355 116 Q430 30 501 116 Q585 14 665 119 Q750 36 837 123 Q902 72 955 143 L955 3 L45 3 Z" fill="#556349" opacity=".9"/>
+        <path d="M108 74 L882 74 Q906 74 906 101 L906 682 Q906 714 875 714 L124 714 Q94 714 94 683 L94 108 Q94 77 108 74 Z" fill="none" stroke="#567d80" stroke-width="20" opacity=".82"/>
+        <!-- 外城轮廓与角楼，不为未定名城门添加文字 -->
+        <path d="M140 96 L860 96 L875 112 L875 676 L858 692 L142 692 L125 675 L125 113 Z" fill="url(#cityPaper)" stroke="#4a3828" stroke-width="12" filter="url(#cityShadow)"/>
+        <path d="M145 110 L855 110 L860 118 L860 670 L850 678 L150 678 L140 668 L140 120 Z" fill="none" stroke="#806a45" stroke-width="3"/>
+        <g fill="#3c2c21" stroke="#b79455" stroke-width="2">
+          <path d="M112 120 L150 82 L188 120 Z"/><path d="M812 120 L850 82 L888 120 Z"/>
+          <path d="M112 668 L150 630 L188 668 Z"/><path d="M812 668 L850 630 L888 668 Z"/>
+        </g>
+        <!-- 主干街路与街巷网络 -->
+        <g fill="none" stroke="#846f4d" stroke-linecap="round">
+          <path d="M500 118 L500 675" stroke-width="15"/><path d="M160 330 L840 330" stroke-width="12"/>
+          <path d="M190 205 L810 205 M175 275 L825 275 M170 525 L830 525 M180 610 L820 610" stroke-width="7" opacity=".72"/>
+          <path d="M235 120 L235 365 M320 120 L320 365 M680 120 L680 365 M765 120 L765 365" stroke-width="6" opacity=".68"/>
+          <path d="M285 445 L285 670 M390 445 L390 670 M610 445 L610 670 M720 445 L720 670" stroke-width="6" opacity=".58"/>
+        </g>
+        <!-- 宫城建筑群 -->
+        <rect x="395" y="130" width="210" height="193" rx="3" fill="#b59662" stroke="#722f25" stroke-width="6"/>
+        ${palaceBuildings}
+        <!-- 街区是画面：成组屋脊，不把 69 个地点各画成孤立房屋 -->
+        <g opacity=".9">${northBlocks}</g>
+        <g opacity=".76">${southBlocks}</g>
+        <!-- 洛水、支流、无名渡船与沿岸泊位 -->
+        <path d="M70 394 C230 370 380 422 510 397 C650 371 780 425 950 391" fill="none" stroke="url(#riverGrad)" stroke-width="58" stroke-linecap="round"/>
+        <path d="M70 394 C230 370 380 422 510 397 C650 371 780 425 950 391" fill="none" stroke="#d2e0d5" stroke-width="2" opacity=".65"/>
+        <path d="M410 482 Q422 438 464 408" fill="none" stroke="#668e8b" stroke-width="20" stroke-linecap="round"/>
+        <g fill="#5d3e28" stroke="#d0b173" stroke-width="2">
+          <path d="M232 372 l42 0 l-8 12 l-27 0 Z"/><path d="M690 414 l44 0 l-9 12 l-27 0 Z"/>
+          <path d="M355 419 q18 11 36 0 l-7 12 h-22 Z"/><path d="M775 369 q18 11 36 0 l-7 12 h-22 Z"/>
+        </g>
+        <!-- 城外西郊疏林 -->
+        <path d="M25 490 Q75 432 119 495 L119 691 L20 691 Z" fill="#596347" opacity=".78"/>
+        <g fill="#354630"><circle cx="48" cy="522" r="14"/><circle cx="86" cy="555" r="18"/><circle cx="44" cy="620" r="20"/><circle cx="95" cy="662" r="15"/></g>
       </svg>
     `;
+  }
+
+  _buildingCluster(x, y, columns, rows, dense) {
+    let markup = '<g class="ycm-building-cluster">';
+    const stepX = dense ? 33 : 42;
+    const stepY = dense ? 29 : 38;
+    const width = dense ? 25 : 30;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        const bx = x + col * stepX + (row % 2) * 5;
+        const by = y + row * stepY;
+        markup += `<path d="M${bx} ${by + 9} l${width / 2} -9 l${width / 2} 9 v12 h-${width} Z"/>`;
+      }
+    }
+    return `${markup}</g>`;
+  }
+
+  _palaceBuilding(x, y, width, height) {
+    return `<g class="ycm-palace-building"><path d="M${x - 8} ${y + 10} L${x + width / 2} ${y - 5} L${x + width + 8} ${y + 10} Z"/><rect x="${x}" y="${y + 10}" width="${width}" height="${height - 10}"/></g>`;
   }
 
 
@@ -240,9 +283,13 @@ export default class YonganCityMapRenderer {
       const isWater = loc.district_id === 'luoshui_north' || loc.district_id === 'luoshui_south' || loc.district_id === 'jinshui_junction';
 
       const marker = document.createElement('div');
-      marker.className = `ycm-map-marker ${isKey ? 'is-key' : 'non-key'} ${isCurrent ? 'is-current-pos' : ''} ${isRoyal ? 'is-royal' : ''} ${isWater ? 'is-water' : ''}`;
+      const isSelected = loc.id === this._selectedLocId;
+      marker.className = `ycm-map-marker ${isKey ? 'is-key' : 'non-key'} ${isCurrent ? 'is-current-pos' : ''} ${isSelected ? 'is-selected' : ''} ${isRoyal ? 'is-royal' : ''} ${isWater ? 'is-water' : ''}`;
       marker.id = `ycm-marker-${loc.id}`;
       marker.setAttribute('data-loc-id', loc.id);
+      marker.setAttribute('role', 'button');
+      marker.setAttribute('tabindex', '0');
+      marker.setAttribute('aria-label', `查看地点：${loc.name || ''}`);
       marker.style.left = `${coords.x}px`;
       marker.style.top = `${coords.y}px`;
 
@@ -255,14 +302,21 @@ export default class YonganCityMapRenderer {
       label.textContent = (isCurrent ? '📍 ' : '') + loc.name;
       marker.appendChild(label);
 
-      marker.addEventListener('click', (e) => {
+      const activate = (e) => {
         e.stopPropagation();
         if (!this._dragMoved) {
+          this.focusLocation(loc.id);
           this.showLocationDetail(loc);
           if (this.onLocationClick) {
             this.onLocationClick(loc);
           }
         }
+      };
+      marker.addEventListener('click', activate);
+      marker.addEventListener('keydown', e => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(e);
       });
 
       container.appendChild(marker);
@@ -323,6 +377,7 @@ export default class YonganCityMapRenderer {
 
   showLocationDetail(loc) {
     if (!this._viewportEl) return;
+    this._selectLocation(loc.id);
 
     if (this._detailCardEl) {
       this._detailCardEl.remove();
@@ -414,9 +469,23 @@ export default class YonganCityMapRenderer {
   focusLocation(locationId) {
     const loc = this.locations.find(l => l.id === locationId);
     if (!loc) return;
+    this._selectLocation(locationId);
     const coords = this.locationToCanvasCoords(loc);
     if (!coords) return;
     this.focusCoordinates(coords.x, coords.y, 1.4);
+  }
+
+  _selectLocation(locationId) {
+    this._selectedLocId = locationId;
+    if (!this._rootEl) return;
+    this._rootEl.querySelectorAll('.ycm-map-marker').forEach(marker => {
+      const selected = marker.getAttribute('data-loc-id') === locationId;
+      if (marker.classList?.toggle) marker.classList.toggle('is-selected', selected);
+    });
+    this._rootEl.querySelectorAll('.ycm-drawer-item').forEach(item => {
+      const selected = item.getAttribute('data-id') === locationId;
+      if (item.classList?.toggle) item.classList.toggle('active', selected);
+    });
   }
 
   focusDistrict(districtId) {
