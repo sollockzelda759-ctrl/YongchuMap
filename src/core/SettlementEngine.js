@@ -120,62 +120,108 @@ export default class SettlementEngine {
     return { success: true, action: 'swipe_handled' };
   }
 
-  // 删除消息：回滚对应结算
-  // 支持两层检索：
-  // 1. 若 messageId 精确匹配已结算楼层，直接回滚该楼层；
-  // 2. 若宿主事件传入的是删除后剩余的新末尾索引（例如原4楼被删，宿主发3），
-  //    则自动在当前 chat 消息列表中扫描，查找哪些已结算过的 messageId 已经不存在于当前 chat 数组（或超出了当前最大楼层），
-  //    并从后往前将其安全回滚恢复快照。
-  onMessageDeleted(messageId) {
-    if (messageId !== null && messageId !== undefined && this.store.isSettled(messageId)) {
-      return this.rollback(messageId);
-    }
-
-    // 第二层容错：检查结算索引中是否存在大于当前最大楼层或不在 chat 列表中的孤立结算记录
+  _getHostContext() {
     try {
-      const state = this.store.getState();
-      const settledMsgIds = Object.keys(state.settlement_index || {});
-      if (settledMsgIds.length > 0) {
-        let currentChatMaxIndex = null;
-        let existingMsgIds = null;
+      if (typeof globalThis !== 'undefined' && globalThis.SillyTavern && typeof globalThis.SillyTavern.getContext === 'function') {
+        return globalThis.SillyTavern.getContext();
+      }
+      if (typeof window !== 'undefined' && window.SillyTavern && typeof window.SillyTavern.getContext === 'function') {
+        return window.SillyTavern.getContext();
+      }
+    } catch (e) { /* 忽略 */ }
+    return null;
+  }
 
-        if (typeof window !== 'undefined' && window.SillyTavern) {
-          const ctx = window.SillyTavern.getContext();
-          if (ctx && ctx.chat && Array.isArray(ctx.chat)) {
-            currentChatMaxIndex = ctx.chat.length - 1;
-            existingMsgIds = new Set();
-            ctx.chat.forEach((m, idx) => {
-              existingMsgIds.add(String(idx));
-              if (m && m.message_id !== undefined) existingMsgIds.add(String(m.message_id));
-              if (m && m.id !== undefined) existingMsgIds.add(String(m.id));
-            });
-          }
+  _getChatMessages() {
+    const ctx = this._getHostContext();
+    if (ctx && Array.isArray(ctx.chat)) {
+      return ctx.chat;
+    }
+    return null;
+  }
+
+  _collectExistingChatIdentifiers(chat) {
+    const existing = {
+      maxIndex: chat.length - 1,
+      indices: new Set(),
+      ids: new Set()
+    };
+    chat.forEach((m, idx) => {
+      existing.indices.add(idx);
+      existing.ids.add(String(idx));
+      if (m && typeof m === 'object') {
+        if (m.message_id !== undefined && m.message_id !== null) {
+          existing.ids.add(String(m.message_id));
         }
-
-        // 按结算历史从后往前找到第一个需要回滚的记录
-        for (let i = state.settlement_history.length - 1; i >= 0; i--) {
-          const rec = state.settlement_history[i];
-          if (rec && !rec.rolled_back && rec.message_id !== null && rec.message_id !== undefined) {
-            const mIdStr = String(rec.message_id);
-            const mIdNum = Number(rec.message_id);
-
-            // 条件 A: 在现有 chat 列表中不存在
-            const missingInChat = existingMsgIds && !existingMsgIds.has(mIdStr);
-            // 条件 B: 数字索引大于当前最大有效楼层
-            const exceedsMax = !isNaN(mIdNum) && (
-              (currentChatMaxIndex !== null && mIdNum > currentChatMaxIndex) ||
-              (typeof messageId === 'number' && mIdNum > messageId)
-            );
-
-            if (missingInChat || exceedsMax) {
-              console.log('[YongchuMap] 发现已删除楼层的结算记录, 自动触发回滚: messageId=' + rec.message_id);
-              return this.rollback(rec.message_id);
-            }
-          }
+        if (m.id !== undefined && m.id !== null) {
+          existing.ids.add(String(m.id));
+        }
+        if (m.uid !== undefined && m.uid !== null) {
+          existing.ids.add(String(m.uid));
         }
       }
+    });
+    return existing;
+  }
+
+  _isMessageInChat(messageId, existingIdentifiers) {
+    if (!existingIdentifiers) return false;
+    const isNumeric = typeof messageId === 'number' ||
+      (typeof messageId === 'string' && /^\d+$/.test(messageId.trim()));
+
+    if (isNumeric) {
+      const idx = Number(messageId);
+      if (idx >= 0 && idx <= existingIdentifiers.maxIndex) {
+        return true;
+      }
+      return existingIdentifiers.ids.has(String(messageId));
+    }
+
+    return existingIdentifiers.ids.has(String(messageId));
+  }
+
+  // 删除消息：回滚对应结算
+  // 关键对账原则：
+  // 1. SillyTavern 的 MESSAGE_DELETED 事件参数常常是被删除后当前选中的索引或残留的新末尾索引，不能当作被删除楼层 ID
+  // 2. 优先通过当前宿主 chat 列表与活跃结算记录 (settlement_history/settlement_index) 进行对账，
+  //    找出真正已经在 chat 中消失的结算楼层并进行回滚；
+  // 3. 即使事件参数传入的 messageId 恰好也是已结算楼层，只要该楼层仍在当前 chat 中，就绝对不能误回滚；
+  // 4. 仅在无法获取宿主 chat 上下文时（如独立单元测试环境），才降级使用事件参数 messageId 回滚。
+  onMessageDeleted(messageId) {
+    try {
+      const chat = this._getChatMessages();
+      if (chat) {
+        const existing = this._collectExistingChatIdentifiers(chat);
+        const state = this.store.getState();
+        const history = state.settlement_history || [];
+
+        // 按结算历史从最新到最旧（倒序）寻找已经在 chat 中消失的活跃结算记录
+        for (let i = history.length - 1; i >= 0; i--) {
+          const rec = history[i];
+          if (!rec || rec.rolled_back) continue;
+          if (rec.message_id === null || rec.message_id === undefined) continue;
+          if (!this.store.isSettled(rec.message_id)) continue;
+
+          const exists = this._isMessageInChat(rec.message_id, existing);
+          if (!exists) {
+            console.log('[YongchuMap] MESSAGE_DELETED 对账发现真正消失的结算楼层, 执行回滚: messageId=' + rec.message_id +
+              ', 事件参数=' + messageId + ', 当前chat最大索引=' + existing.maxIndex);
+            return this.rollback(rec.message_id);
+          }
+        }
+
+        // 若全部活跃结算都在当前 chat 中，说明被删除的消息无结算记录，无需回滚
+        console.log('[YongchuMap] MESSAGE_DELETED 对账完成: 所有已结算楼层均在chat中，无需回滚');
+        return { success: true, action: 'no_settlement_to_clean' };
+      }
     } catch (e) {
-      console.warn('[YongchuMap] onMessageDeleted 孤立检索异常:', e.message);
+      console.warn('[YongchuMap] onMessageDeleted 对账异常:', e.message);
+    }
+
+    // 后备降级逻辑（仅在无法获取当前 chat 列表时触发，如部分单元测试）
+    if (messageId !== null && messageId !== undefined && this.store.isSettled(messageId)) {
+      console.log('[YongchuMap] 无chat上下文，后备回滚指定messageId=' + messageId);
+      return this.rollback(messageId);
     }
 
     return { success: true, action: 'no_settlement_to_clean' };
@@ -183,21 +229,19 @@ export default class SettlementEngine {
 
   async _getMessageContent(messageId) {
     try {
-      if (typeof window !== 'undefined' && window.SillyTavern) {
-        const ctx = window.SillyTavern.getContext();
-        if (ctx && ctx.chat && Array.isArray(ctx.chat)) {
-          // 1. 按数字索引直取
-          if (typeof messageId === 'number' && ctx.chat[messageId]) {
-            return ctx.chat[messageId].mes || '';
-          }
-          // 2. 按message_id / id属性查找
-          const msg = ctx.chat.find(function(m) { return m && (m.message_id === messageId || m.id === messageId); });
-          if (msg) return msg.mes || '';
-          // 3. 数字字符串转数字索引
-          const num = Number(messageId);
-          if (!isNaN(num) && ctx.chat[num]) {
-            return ctx.chat[num].mes || '';
-          }
+      const ctx = this._getHostContext();
+      if (ctx && ctx.chat && Array.isArray(ctx.chat)) {
+        // 1. 按数字索引直取
+        if (typeof messageId === 'number' && ctx.chat[messageId]) {
+          return ctx.chat[messageId].mes || '';
+        }
+        // 2. 按message_id / id属性查找
+        const msg = ctx.chat.find(function(m) { return m && (m.message_id === messageId || m.id === messageId); });
+        if (msg) return msg.mes || '';
+        // 3. 数字字符串转数字索引
+        const num = Number(messageId);
+        if (!isNaN(num) && ctx.chat[num]) {
+          return ctx.chat[num].mes || '';
         }
       }
       return '';

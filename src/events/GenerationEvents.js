@@ -155,9 +155,8 @@ export default class GenerationEvents {
 
   // ── MESSAGE_DELETED：删除消息时回滚对应结算 ──
   // 注意：SillyTavern/TauriTavern 的 MESSAGE_DELETED 事件在消息被从 chat 数组切除后触发，
-  // 传来的参数可能是被删除消息的原始索引、messageId，或删除后末尾的新索引/当前选中的消息。
-  // 因此，若直接传入的 messageId 在结算索引中，优先直接回滚；
-  // 若未直接命中，说明传入的是删除后残留的新末尾索引，应自动在 settlement_history / index 中比对并回滚孤立/已被删楼层的结算。
+  // 传来的参数可能是删除后选中的消息、残留的索引或原索引。
+  // 因此该参数仅作为辅助参考，对账核心依赖当前 chat 数组与活跃结算的差异。
   if (ET.MESSAGE_DELETED) {
     this._addListener(ET.MESSAGE_DELETED, function(data) {
       const messageId = self._resolveMessageId(data);

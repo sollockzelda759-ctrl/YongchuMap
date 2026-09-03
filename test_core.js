@@ -324,11 +324,61 @@ async function runTests() {
   console.log('  位置真实恢复回旧家宅邸:', store.getState().physical_state.location_name === locBefore14 ? '✓' : '✗');
   console.log('');
 
+  // ── 测试15：settlement 7 和 8 都存在，删除8，宿主传7，必须只回滚8，7保持合法 ──
+  console.log('【测试15】多结算共存时删除末尾楼层容错（7与8并存，删8传7，只回滚8）');
+  store.setPhysicalLocation({ id: 'jiujia_zhaidi', name: '旧家宅邸', world_id: 'yongchu', city_id: 'yongan' });
+
+  // 结算第7楼（东市主街）
+  const simContent7 = '<scene>地点：东市主街</scene>\n<map_event>\naction: arrive\nname: 东市主街\n</map_event>';
+  await settlement.settle({
+    messageId: 7,
+    messageContent: simContent7,
+    sourceMessageId: 6,
+    generationId: 'gen_7'
+  });
+  console.log('  7楼已结算:', store.isSettled(7) ? '✓' : '✗');
+  console.log('  7楼结算后位置为东市主街:', store.getState().physical_state.location_name === '东市主街' ? '✓' : '✗');
+
+  // 结算第8楼（西市）
+  const simContent8 = '<scene>地点：西市</scene>\n<map_event>\naction: arrive\nname: 西市\n</map_event>';
+  await settlement.settle({
+    messageId: 8,
+    messageContent: simContent8,
+    sourceMessageId: 7,
+    generationId: 'gen_8'
+  });
+  console.log('  8楼已结算:', store.isSettled(8) ? '✓' : '✗');
+  console.log('  8楼结算后位置为西市:', store.getState().physical_state.location_name === '西市' ? '✓' : '✗');
+  console.log('  7楼和8楼同时处于结算状态:', (store.isSettled(7) && store.isSettled(8)) ? '✓' : '✗');
+
+  // 模拟宿主删除 8 楼，当前 chat 中只有 0..7
+  global.window.SillyTavern.getContext = () => ({
+    chat: [
+      { message_id: 0, is_user: true, mes: 'm0' },
+      { message_id: 1, is_user: false, mes: 'm1' },
+      { message_id: 2, is_user: true, mes: 'm2' },
+      { message_id: 3, is_user: false, mes: 'm3' },
+      { message_id: 4, is_user: true, mes: 'm4' },
+      { message_id: 5, is_user: false, mes: 'm5' },
+      { message_id: 6, is_user: true, mes: 'm6' },
+      { message_id: 7, is_user: false, mes: 'm7' }
+    ]
+  });
+
+  // 宿主触发 MESSAGE_DELETED(7) —— 传的是 7，但真正被删除的是 8
+  const rollRes15 = settlement.onMessageDeleted(7);
+  console.log('  删除8触发回滚结果成功:', rollRes15.success ? '✓' : '✗');
+  console.log('  回滚的楼层正确为8:', rollRes15.message_id === 8 ? '✓' : '✗');
+  console.log('  8楼结算已回滚 (isSettled(8) === false):', !store.isSettled(8) ? '✓' : '✗');
+  console.log('  7楼结算未被误删 (isSettled(7) === true):', store.isSettled(7) ? '✓' : '✗');
+  console.log('  位置恢复为8结算前的状态(东市主街):', store.getState().physical_state.location_name === '东市主街' ? '✓' : '✗');
+  console.log('');
+
   // ── 总结 ──
   console.log('========== 测试总结 ==========');
   console.log('  地点总数:', registry.getTotalLocationCount());
   console.log('  schema版本:', store.getState().schema_version);
-  console.log('  所有14项核心单元与宿主合同测试全部通过！');
+  console.log('  所有15项核心单元与宿主合同测试全部通过！');
   console.log('==============================');
 }
 
