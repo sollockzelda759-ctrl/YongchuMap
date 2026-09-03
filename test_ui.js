@@ -11,7 +11,7 @@ import MapDataLoader from './src/data/MapDataLoader.js';
 import YonganCityMapRenderer from './src/ui/YonganCityMapRenderer.js';
 import StrategicMapRenderer from './src/ui/StrategicMapRenderer.js';
 
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync, statSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import assert from 'node:assert/strict';
@@ -165,6 +165,9 @@ async function runTests() {
   await panel.navigateToCity('yongan');
   await panel.navigateToWorld();
   console.log('  一键跳回世界层:', panel.navState.nationId === null && panel.navState.cityId === null ? '✓' : '✗');
+  assert.ok(panel._renderCurrentLocationBanner().includes('永安'));
+  assert.ok(!panel._renderCurrentLocationBanner().includes('· yongan ·'));
+  console.log('  世界层状态栏使用正式城名而非内部 ID: ✓');
 
   console.log('\n【测试5】同步当前物理状态 (永安直接聚焦)');
   await panel._syncNavWithCurrentState();
@@ -277,12 +280,12 @@ async function runTests() {
   );
   console.log('  8 大主城区几何边界完整映射: ✓');
 
-  const background = renderer._generateBackgroundSvg();
-  ['北定门', '长乐门', '宣武门', '洛水大桥', '东渡渡口', '西渡渡口'].forEach(name => {
-    assert.ok(!background.includes(name), `不得渲染未在正式数据定名的 ${name}`);
-  });
+  assert.ok(renderer.getBackgroundAssetUrl().endsWith('/assets/maps/yongan-city-v2.png'));
 
   const rendererSource = readFileSync(join(__dirname, 'src', 'ui', 'YonganCityMapRenderer.js'), 'utf8');
+  ['北定门', '长乐门', '宣武门', '洛水大桥', '东渡渡口', '西渡渡口'].forEach(name => {
+    assert.ok(!rendererSource.includes(name), `不得渲染未在正式数据定名的 ${name}`);
+  });
   assert.ok(!rendererSource.includes('item.innerHTML ='), '索引动态数据不得直接写 innerHTML');
   assert.ok(!rendererSource.includes('card.innerHTML ='), '详情动态数据不得直接写 innerHTML');
   assert.ok(!rendererSource.includes('1 里'), '非精确测绘画布不得显示误导性固定比例尺');
@@ -304,8 +307,9 @@ async function runTests() {
   console.log('  聚焦地点缩放正常: ✓');
 
   renderer.resetView();
-  assert.equal(renderer.zoom, 1.0);
-  console.log('  重置视图恢复 zoom=1.0: ✓');
+  assert.equal(renderer.zoom, renderer.fitZoom);
+  assert.ok(renderer.zoom < 1, '重置视角应完整容纳城市底图，而非裁切为 1:1');
+  console.log('  重置视图恢复完整城市全景: ✓');
 
   renderer.destroy();
   console.log('  CityMapRenderer 安全销毁: ✓');
@@ -355,7 +359,7 @@ async function runTests() {
     querySelectorAll(selector) {
       const results = [];
       const matches = node => {
-        if (selector.startsWith('.')) return node.className.split(/\s+/).includes(selector.slice(1));
+        if (selector.startsWith('.')) return `${node.className} ${node.attributes.class || ''}`.split(/\s+/).includes(selector.slice(1));
         if (selector.startsWith('#')) return node.id === selector.slice(1);
         const attr = selector.match(/^\[([^=\]]+)(?:="?([^"\]]+)"?)?\]$/);
         if (attr) return Object.hasOwn(node.attributes, attr[1]) && (attr[2] === undefined || node.attributes[attr[1]] === attr[2]);
@@ -382,16 +386,31 @@ async function runTests() {
   const stateGlyphs = worldMount.querySelectorAll('.ycm-state-glyph').map(node => node.textContent);
   assert.deepEqual(stateGlyphs, ['昭', '燕', '赵', '楚', '梁', '陈']);
   assert.equal(worldMount.querySelectorAll('[data-nation-id]').length, 6);
-  assert.ok(!worldMount.querySelector('.ycm-strategic-surface').querySelectorAll('.ycm-state-glyph').some(node => node.textContent.startsWith('大')));
+  assert.ok(worldMount.querySelector('.ycm-map-controls'), '世界层必须具备缩放/重置工具栏');
+  assert.ok(worldMount.querySelector('.ycm-strategic-viewport').listeners.wheel, '世界层必须绑定滚轮缩放');
+  assert.ok(!worldMount.querySelector('.ycm-strategic-world').querySelectorAll('.ycm-state-glyph').some(node => node.textContent.startsWith('大')));
   console.log('  世界地图六国仅渲染单字国号且六区可交互: ✓');
 
   const nationMount = new FakeElement('div');
-  const nationRenderer = new StrategicMapRenderer({ container: nationMount, mode: 'nation', nationData: zhaoRef.nationData });
+  const nationRenderer = new StrategicMapRenderer({ container: nationMount, mode: 'nation', worldData: worldRef.worldData, nationData: zhaoRef.nationData });
   nationRenderer.init();
   assert.equal(nationMount.querySelectorAll('[data-city-id]').length, 13);
   assert.equal(nationMount.querySelectorAll('.ycm-nation-city-name').length, 13);
-  assert.ok(!nationMount.querySelector('.ycm-strategic-surface').querySelectorAll('.ycm-terrain-label').some(node => node.textContent === '昭'));
+  assert.equal(nationMount.querySelectorAll('.ycm-nation-route').length, zhaoRef.nationData.internal_routes.length);
+  assert.ok(nationMount.querySelector('.ycm-map-controls'), '国家层必须具备缩放/重置工具栏');
+  assert.ok(!nationMount.querySelector('.ycm-strategic-world').querySelectorAll('.ycm-terrain-label').some(node => node.textContent === '昭'));
+  nationRenderer.selectCity('yongan');
+  assert.ok(nationMount.querySelector('[data-city-id="yongan"]').classList.contains('is-selected'));
+  assert.ok(nationMount.querySelector('[data-index-city-id="yongan"]').classList.contains('is-selected'));
   console.log('  昭国地图从正式数据渲染 13 城且无地形中央巨型国号: ✓');
+
+  const artPaths = [
+    join(__dirname, 'assets', 'maps', 'yongchu-world-v2.png'),
+    join(__dirname, 'assets', 'maps', 'zhaoguo-national-v2.png'),
+    join(__dirname, 'assets', 'maps', 'yongan-city-v2.png')
+  ];
+  assert.ok(artPaths.every(path => existsSync(path) && statSync(path).size > 500000), '三层正式美术底图必须存在且不是占位图');
+  console.log('  世界、国家、城市三张无文字美术底图已接入: ✓');
 
   const cityMount = new FakeElement('div');
   const selectionRenderer = new YonganCityMapRenderer({

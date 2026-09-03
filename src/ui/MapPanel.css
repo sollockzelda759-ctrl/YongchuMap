@@ -1203,3 +1203,379 @@
   .ycm-map-marker.is-selected::after,
   .ycm-map-marker.is-current-pos .ycm-marker-dot { animation: none; }
 }
+
+/* ============================================================
+   Map Art v2：无文字美术底图 + 独立交互覆盖层
+   ============================================================ */
+.ycm-container {
+  max-width: 1240px;
+  max-height: 860px;
+}
+.ycm-strategic-map {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  min-height: 540px;
+}
+.ycm-strategic-layout {
+  display: flex;
+  min-height: 0;
+  height: 520px;
+  gap: 14px;
+}
+.ycm-strategic-viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(213, 174, 87, .6);
+  border-radius: 9px;
+  background: #07121d;
+  box-shadow: inset 0 0 38px rgba(0, 0, 0, .72), 0 7px 22px rgba(0, 0, 0, .38);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.ycm-strategic-viewport.is-dragging { cursor: grabbing; }
+.ycm-strategic-viewport::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  z-index: 50;
+  pointer-events: none;
+  border: 1px solid rgba(224, 187, 98, .24);
+  border-radius: 6px;
+  box-shadow: inset 0 0 24px rgba(2, 8, 13, .32);
+}
+.ycm-strategic-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1200px;
+  height: 800px;
+  overflow: hidden;
+  transform-origin: 0 0;
+  background: #081521;
+  will-change: transform;
+}
+.ycm-strategic-world.is-animated,
+.ycm-map-world.is-animated {
+  transition: transform .36s cubic-bezier(.2, .72, .22, 1);
+}
+.ycm-strategic-art,
+.ycm-city-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+.ycm-strategic-art {
+  filter: saturate(.92) contrast(1.04) brightness(.93);
+}
+.ycm-world-overlay,
+.ycm-nation-cities,
+.ycm-terrain-labels,
+.ycm-nation-routes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ycm-state-hotspot {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, -50%);
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #f4cc70;
+  cursor: pointer;
+  font-family: "STKaiti", "KaiTi", serif;
+}
+.ycm-state-halo {
+  position: absolute;
+  inset: 7%;
+  border-radius: 48%;
+  background: radial-gradient(ellipse, rgba(239, 195, 81, .34), rgba(231, 177, 56, .09) 46%, transparent 72%);
+  opacity: 0;
+  transform: scale(.78);
+  transition: opacity .2s, transform .25s;
+  pointer-events: none;
+}
+.ycm-state-hotspot:hover .ycm-state-halo,
+.ycm-state-hotspot:focus-visible .ycm-state-halo,
+.ycm-state-hotspot.is-selected .ycm-state-halo {
+  opacity: 1;
+  transform: scale(1);
+}
+.ycm-state-hotspot:focus-visible { outline: none; }
+.ycm-state-glyph {
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  min-width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(244, 204, 112, .72);
+  border-radius: 50%;
+  background: rgba(5, 15, 23, .78);
+  box-shadow: 0 0 0 3px rgba(14, 26, 30, .52), 0 4px 14px rgba(0, 0, 0, .66);
+  color: #f1c76d;
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 2px 5px #000;
+  transition: transform .18s, box-shadow .18s, background .18s;
+}
+.ycm-state-hotspot:hover .ycm-state-glyph,
+.ycm-state-hotspot:focus-visible .ycm-state-glyph,
+.ycm-state-hotspot.is-selected .ycm-state-glyph {
+  transform: translate(-50%, -50%) scale(1.13);
+  background: rgba(93, 49, 24, .9);
+  box-shadow: 0 0 0 4px rgba(230, 184, 75, .34), 0 0 23px rgba(239, 195, 81, .9);
+}
+.ycm-capital-label {
+  position: absolute;
+  left: 50%;
+  top: calc(47% + 42px);
+  z-index: 3;
+  transform: translateX(-50%);
+  padding: 3px 9px;
+  border: 1px solid rgba(218, 185, 112, .55);
+  border-radius: 12px;
+  background: rgba(7, 18, 26, .82);
+  color: #f0d18a;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px #000;
+}
+.ycm-map-cartouche {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  z-index: 60;
+  padding: 7px 12px;
+  border: 1px solid rgba(214, 177, 88, .46);
+  border-radius: 4px;
+  background: rgba(4, 14, 22, .76);
+  color: #dcb760;
+  font-family: "STKaiti", "KaiTi", serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  pointer-events: none;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .45);
+}
+.ycm-strategic-drawer {
+  flex: 0 0 220px;
+  width: 220px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px;
+  box-sizing: border-box;
+  border: 1px solid rgba(212, 175, 55, .35);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(17, 23, 30, .98), rgba(10, 15, 21, .98));
+}
+.ycm-strategic-drawer-title {
+  padding-bottom: 9px;
+  border-bottom: 1px solid rgba(212, 175, 55, .22);
+  color: #ebc765;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.ycm-strategic-index {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: auto;
+  padding: 9px 3px 2px 0;
+}
+.ycm-strategic-index-item {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid rgba(188, 152, 82, .25);
+  border-radius: 5px;
+  background: rgba(238, 226, 196, .045);
+  color: #d8cdb8;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .16s, background .16s, transform .16s;
+}
+.ycm-strategic-index-item:hover,
+.ycm-strategic-index-item:focus-visible,
+.ycm-strategic-index-item.is-selected {
+  outline: none;
+  border-color: #c9a742;
+  background: linear-gradient(90deg, rgba(49, 122, 139, .28), rgba(201, 167, 66, .12));
+  box-shadow: inset 3px 0 #55b6ca;
+  transform: translateX(2px);
+}
+.ycm-strategic-index-item strong,
+.ycm-strategic-index-item span { display: block; }
+.ycm-strategic-index-item strong { color: #ead38d; font-size: 12px; }
+.ycm-strategic-index-item span { margin-top: 2px; color: #9e9585; font-size: 9px; }
+.ycm-nation-routes { z-index: 2; pointer-events: none; }
+.ycm-nation-route {
+  fill: none;
+  stroke: rgba(239, 207, 133, .7);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px rgba(42, 24, 12, .88));
+}
+.ycm-terrain-labels { z-index: 3; pointer-events: none; }
+.ycm-terrain-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 3px 9px;
+  border: 1px solid rgba(218, 184, 105, .38);
+  border-radius: 12px;
+  background: rgba(6, 17, 24, .7);
+  color: #ead49a;
+  font-family: "STKaiti", "KaiTi", serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-shadow: 0 2px 4px #000;
+  white-space: nowrap;
+}
+.ycm-terrain-river { color: #a8d3d3; border-color: rgba(105, 169, 177, .56); }
+.ycm-nation-cities { z-index: 5; pointer-events: none; }
+.ycm-nation-city {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 1px solid rgba(224, 193, 126, .7);
+  border-radius: 16px;
+  background: rgba(7, 17, 23, .84);
+  color: #f1dfb0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .68);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform .16s, box-shadow .16s, background .16s;
+}
+.ycm-nation-city:hover,
+.ycm-nation-city:focus-visible,
+.ycm-nation-city.is-selected {
+  z-index: 9;
+  outline: none;
+  transform: translate(-50%, -50%) scale(1.13);
+  background: rgba(24, 67, 77, .94);
+  border-color: #f0c958;
+  box-shadow: 0 0 0 4px rgba(62, 157, 180, .44), 0 0 20px rgba(240, 201, 88, .78);
+}
+.ycm-nation-city-dot {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 11px;
+  border: 2px solid #f0ca67;
+  border-radius: 50%;
+  background: #92512e;
+  box-shadow: 0 0 6px rgba(241, 199, 98, .75);
+}
+.ycm-nation-city.is-capital {
+  padding: 8px 13px;
+  border-color: #f1ce66;
+  background: rgba(91, 34, 23, .9);
+}
+.ycm-nation-city.is-capital .ycm-nation-city-dot {
+  width: 15px;
+  height: 15px;
+  flex-basis: 15px;
+  border-radius: 3px;
+  transform: rotate(45deg);
+  background: #d59522;
+}
+.ycm-nation-city-name {
+  font-family: "STKaiti", "KaiTi", serif;
+  font-size: 18px;
+  font-weight: 800;
+  white-space: nowrap;
+  text-shadow: 0 2px 3px #000;
+}
+.ycm-strategic-controls { z-index: 70; }
+
+/* 永安美术底图与覆盖层 */
+.ycm-city-view-container { height: 580px; }
+.ycm-map-world {
+  background: #0a1720;
+  will-change: transform;
+}
+.ycm-city-art {
+  filter: saturate(.94) contrast(1.045) brightness(.94);
+}
+.ycm-district-zone {
+  border: 1px solid transparent;
+  background: transparent;
+}
+.ycm-district-zone:hover {
+  border-color: rgba(244, 213, 132, .58);
+  background: rgba(255, 231, 166, .08);
+}
+.ycm-district-label {
+  color: #f2dfad;
+  background: rgba(6, 18, 24, .72);
+  border: 1px solid rgba(220, 184, 102, .45);
+  text-shadow: 0 1px 3px #000;
+}
+.ycm-map-world.zoom-medium .ycm-map-marker.non-key .ycm-marker-label { display: none; }
+.ycm-map-world.zoom-medium .ycm-map-marker.non-key:hover .ycm-marker-label,
+.ycm-map-world.zoom-medium .ycm-map-marker.non-key:focus-visible .ycm-marker-label,
+.ycm-map-world.zoom-medium .ycm-map-marker.is-current-pos .ycm-marker-label,
+.ycm-map-world.zoom-medium .ycm-map-marker.is-selected .ycm-marker-label { display: block !important; }
+.ycm-map-world.zoom-low .ycm-map-marker.non-key { opacity: .6; }
+.ycm-map-world.zoom-low .ycm-map-marker.is-current-pos,
+.ycm-map-world.zoom-low .ycm-map-marker.is-selected { opacity: 1; }
+.ycm-detail-card {
+  top: 14px;
+  left: auto;
+  right: 14px;
+  width: 290px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+@media (max-width: 900px) {
+  .ycm-strategic-layout { height: 620px; flex-direction: column; }
+  .ycm-strategic-viewport { min-height: 430px; }
+  .ycm-strategic-drawer { width: 100%; flex: 0 0 150px; }
+  .ycm-strategic-index { flex-direction: row; overflow-x: auto; overflow-y: hidden; }
+  .ycm-strategic-index-item { width: 150px; }
+}
+
+@media (max-width: 760px) {
+  .ycm-strategic-map { min-height: 610px; }
+  .ycm-strategic-layout { height: 590px; }
+  .ycm-strategic-viewport { min-height: 405px; }
+  .ycm-map-cartouche { display: none; }
+  .ycm-state-glyph { min-width: 48px; height: 48px; font-size: 31px; }
+  .ycm-capital-label { font-size: 12px; }
+  .ycm-nation-city { padding: 6px 9px; }
+  .ycm-nation-city-name { font-size: 16px; }
+  .ycm-city-view-container { height: 620px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ycm-strategic-world.is-animated,
+  .ycm-map-world.is-animated { transition: none; }
+}

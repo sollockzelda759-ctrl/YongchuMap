@@ -1,3 +1,5 @@
+const CITY_ART_URL = new URL('../../assets/maps/yongan-city-v2.png', import.meta.url).href;
+
 // ============================================================
 // YonganCityMapRenderer.js —— 永安城可视化地图渲染器 (ESM)
 // 职责：永安城 12×10 里视觉布局参考画布、视口平移缩放、8个城区与69地点映射、
@@ -14,8 +16,9 @@ export default class YonganCityMapRenderer {
     this.onLocationClick = options.onLocationClick || null;
 
     // 视口平移与缩放 (Viewport State)
-    this.zoom = 1.0;
-    this.minZoom = 0.65;
+    this.zoom = 0.65;
+    this.fitZoom = 0.65;
+    this.minZoom = 0.5;
     this.maxZoom = 2.5;
     this.panX = 0;
     this.panY = 0;
@@ -27,6 +30,7 @@ export default class YonganCityMapRenderer {
     this._dragMoved = false;
     this._pointerStartX = 0;
     this._pointerStartY = 0;
+    this._captureEl = null;
 
     // DOM 缓存引用
     this._rootEl = null;
@@ -96,13 +100,19 @@ export default class YonganCityMapRenderer {
 
     // 2. 世界层
     const world = document.createElement('div');
-    world.className = 'ycm-map-world' + (this.zoom < 1.1 ? ' zoom-low' : '');
+    world.className = 'ycm-map-world zoom-low zoom-medium';
     this._worldEl = world;
 
     // 2.1 背景层
     const bgLayer = document.createElement('div');
     bgLayer.className = 'ycm-layer-bg';
-    bgLayer.innerHTML = this._generateBackgroundSvg();
+    const cityArt = document.createElement('img');
+    cityArt.className = 'ycm-city-art';
+    cityArt.src = CITY_ART_URL;
+    cityArt.alt = '';
+    cityArt.draggable = false;
+    cityArt.setAttribute('aria-hidden', 'true');
+    bgLayer.appendChild(cityArt);
     world.appendChild(bgLayer);
 
     // 2.2 城区层
@@ -153,93 +163,8 @@ export default class YonganCityMapRenderer {
     this._bindEvents();
   }
 
-  _generateBackgroundSvg() {
-    const northBlocks = [
-      [180, 165, 5, 3], [175, 250, 5, 3], [650, 165, 5, 3], [655, 255, 5, 3],
-      [260, 175, 4, 3], [270, 270, 4, 2], [690, 335, 5, 2]
-    ].map(args => this._buildingCluster(...args, true)).join('');
-    const southBlocks = [
-      [235, 480, 4, 2], [330, 500, 4, 2], [535, 485, 4, 2], [650, 500, 4, 2],
-      [240, 585, 3, 2], [450, 590, 4, 2], [650, 590, 3, 2]
-    ].map(args => this._buildingCluster(...args, false)).join('');
-    const palaceBuildings = [
-      [430, 175, 140, 38], [448, 230, 104, 32], [463, 278, 74, 27]
-    ].map(([x, y, w, h]) => this._palaceBuilding(x, y, w, h)).join('');
-    return `
-      <svg class="ycm-map-svg-bg" viewBox="0 0 1000 750" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="riverGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#527c83"/>
-            <stop offset="50%" stop-color="#7fa2a0"/>
-            <stop offset="100%" stop-color="#496f78"/>
-          </linearGradient>
-          <linearGradient id="cityPaper" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#b9a477"/>
-            <stop offset="45%" stop-color="#d2c49e"/>
-            <stop offset="100%" stop-color="#9e865d"/>
-          </linearGradient>
-          <filter id="cityShadow"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#201a12" flood-opacity=".5"/></filter>
-          <pattern id="paperFibres" width="23" height="23" patternUnits="userSpaceOnUse">
-            <path d="M0 7 L23 4 M3 19 L19 22" stroke="#604c31" stroke-width=".6" opacity=".12"/>
-          </pattern>
-        </defs>
-        <rect width="1000" height="750" fill="#7c7257"/>
-        <rect width="1000" height="750" fill="url(#paperFibres)"/>
-        <!-- 城外山林与护城河：均来自 city.json 的景山/护城河资料 -->
-        <path d="M55 130 Q125 42 205 121 Q275 18 355 116 Q430 30 501 116 Q585 14 665 119 Q750 36 837 123 Q902 72 955 143 L955 3 L45 3 Z" fill="#556349" opacity=".9"/>
-        <path d="M108 74 L882 74 Q906 74 906 101 L906 682 Q906 714 875 714 L124 714 Q94 714 94 683 L94 108 Q94 77 108 74 Z" fill="none" stroke="#567d80" stroke-width="20" opacity=".82"/>
-        <!-- 外城轮廓与角楼，不为未定名城门添加文字 -->
-        <path d="M140 96 L860 96 L875 112 L875 676 L858 692 L142 692 L125 675 L125 113 Z" fill="url(#cityPaper)" stroke="#4a3828" stroke-width="12" filter="url(#cityShadow)"/>
-        <path d="M145 110 L855 110 L860 118 L860 670 L850 678 L150 678 L140 668 L140 120 Z" fill="none" stroke="#806a45" stroke-width="3"/>
-        <g fill="#3c2c21" stroke="#b79455" stroke-width="2">
-          <path d="M112 120 L150 82 L188 120 Z"/><path d="M812 120 L850 82 L888 120 Z"/>
-          <path d="M112 668 L150 630 L188 668 Z"/><path d="M812 668 L850 630 L888 668 Z"/>
-        </g>
-        <!-- 主干街路与街巷网络 -->
-        <g fill="none" stroke="#846f4d" stroke-linecap="round">
-          <path d="M500 118 L500 675" stroke-width="15"/><path d="M160 330 L840 330" stroke-width="12"/>
-          <path d="M190 205 L810 205 M175 275 L825 275 M170 525 L830 525 M180 610 L820 610" stroke-width="7" opacity=".72"/>
-          <path d="M235 120 L235 365 M320 120 L320 365 M680 120 L680 365 M765 120 L765 365" stroke-width="6" opacity=".68"/>
-          <path d="M285 445 L285 670 M390 445 L390 670 M610 445 L610 670 M720 445 L720 670" stroke-width="6" opacity=".58"/>
-        </g>
-        <!-- 宫城建筑群 -->
-        <rect x="395" y="130" width="210" height="193" rx="3" fill="#b59662" stroke="#722f25" stroke-width="6"/>
-        ${palaceBuildings}
-        <!-- 街区是画面：成组屋脊，不把 69 个地点各画成孤立房屋 -->
-        <g opacity=".9">${northBlocks}</g>
-        <g opacity=".76">${southBlocks}</g>
-        <!-- 洛水、支流、无名渡船与沿岸泊位 -->
-        <path d="M70 394 C230 370 380 422 510 397 C650 371 780 425 950 391" fill="none" stroke="url(#riverGrad)" stroke-width="58" stroke-linecap="round"/>
-        <path d="M70 394 C230 370 380 422 510 397 C650 371 780 425 950 391" fill="none" stroke="#d2e0d5" stroke-width="2" opacity=".65"/>
-        <path d="M410 482 Q422 438 464 408" fill="none" stroke="#668e8b" stroke-width="20" stroke-linecap="round"/>
-        <g fill="#5d3e28" stroke="#d0b173" stroke-width="2">
-          <path d="M232 372 l42 0 l-8 12 l-27 0 Z"/><path d="M690 414 l44 0 l-9 12 l-27 0 Z"/>
-          <path d="M355 419 q18 11 36 0 l-7 12 h-22 Z"/><path d="M775 369 q18 11 36 0 l-7 12 h-22 Z"/>
-        </g>
-        <!-- 城外西郊疏林 -->
-        <path d="M25 490 Q75 432 119 495 L119 691 L20 691 Z" fill="#596347" opacity=".78"/>
-        <g fill="#354630"><circle cx="48" cy="522" r="14"/><circle cx="86" cy="555" r="18"/><circle cx="44" cy="620" r="20"/><circle cx="95" cy="662" r="15"/></g>
-      </svg>
-    `;
-  }
-
-  _buildingCluster(x, y, columns, rows, dense) {
-    let markup = '<g class="ycm-building-cluster">';
-    const stepX = dense ? 33 : 42;
-    const stepY = dense ? 29 : 38;
-    const width = dense ? 25 : 30;
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < columns; col++) {
-        const bx = x + col * stepX + (row % 2) * 5;
-        const by = y + row * stepY;
-        markup += `<path d="M${bx} ${by + 9} l${width / 2} -9 l${width / 2} 9 v12 h-${width} Z"/>`;
-      }
-    }
-    return `${markup}</g>`;
-  }
-
-  _palaceBuilding(x, y, width, height) {
-    return `<g class="ycm-palace-building"><path d="M${x - 8} ${y + 10} L${x + width / 2} ${y - 5} L${x + width + 8} ${y + 10} Z"/><rect x="${x}" y="${y + 10}" width="${width}" height="${height - 10}"/></g>`;
+  getBackgroundAssetUrl() {
+    return CITY_ART_URL;
   }
 
 
@@ -503,21 +428,24 @@ export default class YonganCityMapRenderer {
 
     this.panX = vw / 2 - targetX * this.zoom;
     this.panY = vh / 2 - targetY * this.zoom;
-    this._updateTransform();
+    this._updateTransform(true);
   }
 
   resetView() {
-    this.zoom = 1.0;
     if (this._viewportEl) {
       const vw = this._viewportEl.clientWidth || 600;
       const vh = this._viewportEl.clientHeight || 500;
+      this.fitZoom = Math.max(this.minZoom, Math.min(1, Math.min((vw - 12) / this.worldWidth, (vh - 12) / this.worldHeight)));
+      this.zoom = this.fitZoom;
       this.panX = (vw - this.worldWidth * this.zoom) / 2;
       this.panY = (vh - this.worldHeight * this.zoom) / 2;
     } else {
+      this.fitZoom = 0.65;
+      this.zoom = this.fitZoom;
       this.panX = 0;
       this.panY = 0;
     }
-    this._updateTransform();
+    this._updateTransform(true);
   }
 
   _bindEvents() {
@@ -525,14 +453,20 @@ export default class YonganCityMapRenderer {
 
     const controls = this._viewportEl.querySelector('.ycm-map-controls');
     if (controls) {
-      controls.addEventListener('click', (e) => {
-        const btn = e.target.closest('.ycm-map-ctrl-btn');
-        if (!btn) return;
-        const act = btn.getAttribute('data-act');
+      const buttons = controls.querySelectorAll('.ycm-map-ctrl-btn');
+      const runAction = act => {
         if (act === 'zoom-in') this.zoomIn();
         if (act === 'zoom-out') this.zoomOut();
         if (act === 'reset') this.resetView();
-      });
+      };
+      if (buttons.length) {
+        buttons.forEach(btn => btn.addEventListener('click', e => {
+          e.stopPropagation();
+          runAction(btn.getAttribute('data-act'));
+        }));
+      } else {
+        controls.addEventListener('click', e => runAction(e.target.closest('.ycm-map-ctrl-btn')?.getAttribute('data-act')));
+      }
     }
 
     this._viewportEl.addEventListener('wheel', (e) => {
@@ -556,14 +490,15 @@ export default class YonganCityMapRenderer {
       const target = e.target;
       if (target?.closest?.('.ycm-map-controls') || target?.closest?.('.ycm-detail-card')) return;
       this._isDragging = true;
+      this._viewportEl.classList.add('is-dragging');
+      this._worldEl?.classList.remove('is-animated');
       this._pointerStartX = e.clientX;
       this._pointerStartY = e.clientY;
       this._startX = e.clientX - this.panX;
       this._startY = e.clientY - this.panY;
       this._dragMoved = false;
-      if (typeof this._viewportEl.setPointerCapture === 'function') {
-        try { this._viewportEl.setPointerCapture(e.pointerId); } catch (_) {}
-      }
+      this._captureEl = e.target || this._viewportEl;
+      try { this._captureEl.setPointerCapture?.(e.pointerId); } catch (_) {}
     });
 
     this._viewportEl.addEventListener('pointermove', (e) => {
@@ -581,9 +516,9 @@ export default class YonganCityMapRenderer {
     const stopDrag = (e) => {
       if (this._isDragging) {
         this._isDragging = false;
-        if (typeof this._viewportEl.releasePointerCapture === 'function') {
-          try { this._viewportEl.releasePointerCapture(e.pointerId); } catch (_) {}
-        }
+        this._viewportEl.classList.remove('is-dragging');
+        try { this._captureEl?.releasePointerCapture?.(e.pointerId); } catch (_) {}
+        this._captureEl = null;
       }
     };
 
@@ -601,14 +536,12 @@ export default class YonganCityMapRenderer {
     this._updateTransform();
   }
 
-  _updateTransform() {
+  _updateTransform(animated = false) {
     if (!this._worldEl) return;
+    this._worldEl.classList.toggle('is-animated', !!animated && !this._isDragging);
     this._worldEl.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
-    if (this.zoom < 1.1) {
-      this._worldEl.classList.add('zoom-low');
-    } else {
-      this._worldEl.classList.remove('zoom-low');
-    }
+    this._worldEl.classList.toggle('zoom-low', this.zoom < 0.9);
+    this._worldEl.classList.toggle('zoom-medium', this.zoom < 1.55);
   }
 
   destroy() {

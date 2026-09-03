@@ -54,6 +54,7 @@ export default class MapPanel {
     this._currentNationRef = null;
     this._currentCityRef = null;
     this._cityLocationsRef = null;
+    this._cityNameCache = new Map();
     this._isLoading = false;
     this._loadError = null;
 
@@ -559,6 +560,13 @@ export default class MapPanel {
       this._currentNationRef = loaded.nationRef;
       this._currentCityRef = loaded.cityRef;
       this._cityLocationsRef = loaded.cityLocationsRef;
+      (loaded.worldRef?.worldData?.nations || []).forEach(nation => {
+        (nation.keyCities || []).forEach(city => this._cityNameCache.set(city.id, city.name));
+      });
+      (loaded.nationRef?.nationData?.cities || []).forEach(city => this._cityNameCache.set(city.id, city.name));
+      if (loaded.cityRef?.cityMeta?.id && loaded.cityRef?.cityMeta?.name) {
+        this._cityNameCache.set(loaded.cityRef.cityMeta.id, loaded.cityRef.cityMeta.name);
+      }
       if (this.registry && loaded.cityLocationsRef?.locations?.length > 0) {
         const registered = this.registry.getCityLocations(nav.worldId, nav.cityId);
         if (!registered || registered.length === 0) {
@@ -660,7 +668,7 @@ export default class MapPanel {
     const loadedCity = this._currentCityRef?.cityMeta;
     const loadedNation = this._currentWorldRef?.worldData?.nations?.find(n => n.id === this.navState.nationId);
     const cityName = phys.city_id
-      ? (loadedCity?.id === phys.city_id ? loadedCity.name : phys.city_id)
+      ? (loadedCity?.id === phys.city_id ? loadedCity.name : (this._cityNameCache.get(phys.city_id) || phys.city_id))
       : '未记录';
     const nationName = phys.nation || loadedNation?.fullName || loadedNation?.name || '未记录';
 
