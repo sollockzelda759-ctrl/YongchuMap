@@ -1,0 +1,250 @@
+{
+  "schema_version": "1.0.0",
+  "id": "zhao_guo",
+  "name": "昭",
+  "full_name": "大昭",
+  "world_id": "yongchu",
+  "capital_city_id": "yongan",
+  "territory": {
+    "east_west_li": 800,
+    "north_south_li": 700,
+    "core_region": "中部洛水平原为全国粮仓，北部依托青屏山脉，南部临澜江，东部丘陵林地，西部平原通梁国",
+    "borders": {
+      "north": "青屏山脉（与燕国对峙，主峰险阻）",
+      "west": "平原通衢（与梁国商路畅通无天险，东关为界）",
+      "south": "澜江（与陈国界河，临澜水寨与渡口）",
+      "east": "丘陵林地（东丘向东延伸入赵国山区，人口稀少）"
+    }
+  },
+  "military_system": {
+    "standing_army": 150000,
+    "beijing_junzhen": {
+      "commander": "秦戈",
+      "garrison": 50000,
+      "headquarters": "青壁城",
+      "defense_sectors": [
+        {
+          "name": "东段防线",
+          "commander": "赵铮"
+        },
+        {
+          "name": "西段防线",
+          "commander": "陆沉"
+        }
+      ],
+      "beacon_tower_chain": "自青壁城向南延伸至永安，每三十里一座，共约三十座，军情一日可达都城"
+    },
+    "navy": {
+      "commander": "顾江",
+      "warships": 50,
+      "base": "澜江沿岸水寨 (临澜上游三里处)",
+      "duty": "巡防澜江，与陈国水师联合巡防"
+    },
+    "capital_garrison": "禁卫军守卫皇宫与永安都城"
+  },
+  "cities": [
+    {
+      "id": "yongan",
+      "name": "永安",
+      "type": "都城",
+      "position_in_nation": "昭国中部偏南，洛水两岸",
+      "population": 850000,
+      "floating_population": "8-12万 (中秋灯会可达105万)",
+      "distance_from_capital_li": 0,
+      "features": "六国第三大城，东西十二里南北十里，洛水穿城，坊市不分离，全年无宵禁，商业极盛",
+      "city_data_file": "./cities/yongan.city.json"
+    },
+    {
+      "id": "qingbicheng",
+      "name": "青壁城",
+      "alias": "青屏",
+      "type": "北境军镇",
+      "position_in_nation": "昭国北部，青屏山脉南麓",
+      "population": 120000,
+      "garrison": 50000,
+      "distance_from_capital_li": 900,
+      "travel_time_from_yongan": {
+        "express_courier_days": 3,
+        "horse_normal_days": 7,
+        "caravan_days": 14,
+        "beacon_hours": 12
+      },
+      "features": "直面北地风雪第一道屏障，军市、退役将士聚居区、三十座烽火台起点，物价比永安高三成"
+    },
+    {
+      "id": "linlan",
+      "name": "临澜",
+      "type": "江城/水乡",
+      "position_in_nation": "昭国南部，澜江北岸",
+      "population": 280000,
+      "distance_from_capital_li": 600,
+      "travel_time_from_yongan": {
+        "horse_normal_days": 5,
+        "caravan_days": 9,
+        "water_downstream_days": 4,
+        "water_upstream_days": 7
+      },
+      "features": "水网密布常年江雾，昭陈跨国共管渡口、江面浮市、澜江水军水寨（上游三里）"
+    },
+    {
+      "id": "fengshui",
+      "name": "丰水",
+      "type": "粮仓重镇",
+      "position_in_nation": "昭国中部偏西，洛水平原腹地",
+      "population": 360000,
+      "distance_from_capital_li": 200,
+      "travel_time_from_yongan": {
+        "horse_normal_days": 1.5,
+        "caravan_days": 3,
+        "water_downstream_days": 1
+      },
+      "features": "掌握天下粮脉，十二座宏伟巨堡官仓群，水碾坊街日夜轰鸣，六国粮价基准水牌"
+    },
+    {
+      "id": "bailu",
+      "name": "白鹿",
+      "type": "文教城",
+      "position_in_nation": "昭国中部偏南，永安以南百里",
+      "population": 220000,
+      "distance_from_capital_li": 100,
+      "travel_time_from_yongan": {
+        "horse_normal_days": 0.5,
+        "carriage_days": 0.8,
+        "walking_days": 2
+      },
+      "features": "天下闻名白鹿书院，藏书超官府，刻书坊集散地，每月十五论辩集(小朝议)"
+    },
+    {
+      "id": "luokou",
+      "name": "洛口",
+      "type": "商贸枢纽",
+      "position_in_nation": "昭国西部，洛水上游，邻近梁国东关",
+      "population": 300000,
+      "floating_population": "10万起",
+      "distance_from_capital_li": 700,
+      "travel_time_from_yongan": {
+        "horse_normal_days": 6,
+        "caravan_days": 10,
+        "water_downstream_days": 4,
+        "water_upstream_days": 8
+      },
+      "features": "昭国西大门，梁国西域商队入昭第一站，骆驼栈场转驳马车与水船，双币流通"
+    },
+    {
+      "id": "dongqiu",
+      "name": "东丘",
+      "type": "丘陵城镇",
+      "position_in_nation": "昭国东部山林丘陵",
+      "population": 120000,
+      "distance_from_capital_li": 500,
+      "features": "半数靠山林过活，东丘特产青漆，猎户行会，永安高档鹿肉狐裘供货地"
+    },
+    {
+      "id": "pingchuan",
+      "name": "平川",
+      "type": "腹地城镇",
+      "position_in_nation": "昭国中部平原",
+      "distance_from_capital_li": 400,
+      "historical_significance": "昭太祖平川之战定鼎之地",
+      "features": "农耕重镇"
+    },
+    {
+      "id": "heqing",
+      "name": "河清",
+      "type": "郡城",
+      "position_in_nation": "昭国中近畿",
+      "distance_from_capital_li": 150,
+      "features": "近畿重郡，灵家等世家学田族田集中分布区"
+    },
+    {
+      "id": "nanxi",
+      "name": "南溪",
+      "type": "南部城镇",
+      "position_in_nation": "昭国南部偏西",
+      "distance_from_capital_li": 500,
+      "features": "通往楚国云梦方向与西南山区的驿路节点"
+    },
+    {
+      "id": "dujiang",
+      "name": "渡江",
+      "type": "江防要冲",
+      "position_in_nation": "昭国南部澜江沿线",
+      "distance_from_capital_li": 550,
+      "distance_from_linlan_li": 200,
+      "features": "澜江上游渡口防线"
+    },
+    {
+      "id": "shimen",
+      "name": "石门",
+      "type": "关隘城镇",
+      "position_in_nation": "昭国境内险要要道",
+      "distance_from_capital_li": 550,
+      "features": "山地通道门户"
+    },
+    {
+      "id": "yunling",
+      "name": "云岭",
+      "type": "北境山前要冲",
+      "position_in_nation": "昭国北部向青屏过渡山区",
+      "distance_from_capital_li": 650,
+      "distance_from_qingbicheng_li": 300,
+      "features": "三十座烽火台链的重要枢纽节点"
+    }
+  ],
+  "internal_routes": [
+    {
+      "name": "北境烽火官道",
+      "from": "yongan",
+      "to": "qingbicheng",
+      "distance_li": 900,
+      "via": [
+        "yunling"
+      ],
+      "features": "每三十里一座烽火台，三十座烽火台链"
+    },
+    {
+      "name": "洛水粮道水路",
+      "from": "luokou",
+      "to": "fengshui",
+      "distance_li": 500,
+      "features": "自西向东顺流，大宗粮饷西域物资动脉"
+    },
+    {
+      "name": "永安丰水线",
+      "from": "yongan",
+      "to": "fengshui",
+      "distance_li": 200,
+      "travel_time": {
+        "horse_days": 1.5,
+        "boat_downstream_days": 1
+      }
+    },
+    {
+      "name": "白鹿文教官道",
+      "from": "yongan",
+      "to": "bailu",
+      "distance_li": 100,
+      "travel_time": {
+        "horse_days": 0.5,
+        "carriage_days": 0.8
+      }
+    },
+    {
+      "name": "南境江运道",
+      "from": "yongan",
+      "to": "linlan",
+      "distance_li": 600,
+      "travel_time": {
+        "horse_days": 5,
+        "boat_days": 4
+      }
+    },
+    {
+      "name": "澜江巡防线",
+      "from": "dujiang",
+      "to": "linlan",
+      "distance_li": 200,
+      "features": "沿澜江水路"
+    }
+  ]
+}

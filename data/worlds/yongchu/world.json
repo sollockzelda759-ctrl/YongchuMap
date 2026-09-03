@@ -1,0 +1,524 @@
+{
+  "schema_version": "1.0.0",
+  "id": "yongchu",
+  "name": "永初大陆",
+  "historical_background": {
+    "era": "六国成型期 (距今约一百五十年)",
+    "preceding_dynasty": "大一统大胤朝 (距今约五百年至三百五十年，定都中州)",
+    "collapse_reason": "末代胤帝推行严苛括田令与铁矿强收引发世家大矿主联手反叛，青屏防线被破，都城被毁皇室绝嗣",
+    "transition_period": "大分裂与混战时期 (距今约三百五十至一百五十年前)，历经白骨之乱与洛水断流之战"
+  },
+  "demographics": {
+    "total_registered_population": 52000000,
+    "census_scope": "仅计六国正式编户，不含游牧、流民、隐户与深山山民",
+    "factions": {
+      "north_alliance": {
+        "name": "北盟",
+        "members": [
+          "yan",
+          "zhao",
+          "chu"
+        ],
+        "population": 29100000,
+        "features": "人口基数大但地理割裂，燕赵缺粮对粮荒极敏感"
+      },
+      "south_coalition": {
+        "name": "南合",
+        "members": [
+          "zhao_guo",
+          "liang",
+          "chen"
+        ],
+        "population": 22900000,
+        "features": "人口略少但经济、水陆交通与商贸协同极强"
+      }
+    }
+  },
+  "nations": [
+    {
+      "id": "zhao_guo",
+      "name": "昭",
+      "fullName": "大昭",
+      "capital": "yongan",
+      "faction": "south_coalition",
+      "population": 11400000,
+      "populationRatio": "22%",
+      "geographicPosition": "大陆中部偏南",
+      "territoryDimensions": {
+        "eastWestLi": 800,
+        "northSouthLi": 700
+      },
+      "terrain": "中部洛水平原为全国粮仓，北部接青屏山脉，南部临澜江，东部丘陵林地，西部接梁国平原无天险",
+      "military": {
+        "standingArmy": 150000,
+        "coreForces": "北境军镇五万精兵（驻青壁城，分东西两段防线）；澜江水军五十余艘战船"
+      },
+      "nationalDataFile": "./nations/zhaoguo.national.json"
+    },
+    {
+      "id": "yan",
+      "name": "燕",
+      "fullName": "大燕",
+      "capital": "fengtian",
+      "faction": "north_alliance",
+      "population": 10900000,
+      "populationRatio": "21%",
+      "geographicPosition": "大陆北方",
+      "territoryDimensions": {
+        "eastWestLi": 1000,
+        "northSouthLi": 800
+      },
+      "terrain": "全境平原与草场为主，北部延伸入无边界大草原，南部以青屏山脉与昭国对峙",
+      "military": {
+        "standingArmy": 250000,
+        "coreForces": "铁骑八万，草原可动员三至五万骑兵，南部驻军六万对峙昭国"
+      },
+      "keyCities": [
+        {
+          "id": "fengtian",
+          "name": "奉天",
+          "type": "都城",
+          "population": 980000
+        },
+        {
+          "id": "baimacheng",
+          "name": "白马城",
+          "type": "草原边境城/最大马市",
+          "population": 150000
+        },
+        {
+          "id": "nanguan",
+          "name": "南关",
+          "type": "军事要塞",
+          "population": 90000
+        },
+        {
+          "id": "tieyingzhai",
+          "name": "铁鹰寨",
+          "type": "军屯城",
+          "population": 160000
+        },
+        {
+          "id": "hecheng",
+          "name": "合城",
+          "type": "燕赵互市城",
+          "population": 220000
+        },
+        {
+          "id": "huangqiu",
+          "name": "荒丘",
+          "type": "草原前哨",
+          "population": 40000
+        }
+      ]
+    },
+    {
+      "id": "zhao",
+      "name": "赵",
+      "fullName": "大赵",
+      "capital": "tieling",
+      "faction": "north_alliance",
+      "population": 5700000,
+      "populationRatio": "11%",
+      "geographicPosition": "大陆东北",
+      "territoryDimensions": {
+        "eastWestLi": 600,
+        "northSouthLi": 700
+      },
+      "terrain": "全境多山，矿脉纵横，耕地稀少，东临短海岸线多礁石，大军难行",
+      "military": {
+        "standingArmy": 120000,
+        "coreForces": "重甲步兵，山地防守强，工匠造大型攻城器械，平原野战弱"
+      },
+      "keyCities": [
+        {
+          "id": "tieling",
+          "name": "铁陵",
+          "type": "都城/矿山工匠之都",
+          "population": 520000
+        },
+        {
+          "id": "kuangyuan",
+          "name": "矿渊",
+          "type": "矿区核心城",
+          "population": 240000
+        },
+        {
+          "id": "chuitai",
+          "name": "锤台",
+          "type": "锻造学徒城",
+          "population": 180000
+        },
+        {
+          "id": "jiaoan",
+          "name": "礁岸",
+          "type": "沿海暗港",
+          "population": 70000
+        },
+        {
+          "id": "guanshan",
+          "name": "关山",
+          "type": "山区关隘",
+          "population": 50000
+        },
+        {
+          "id": "bitan",
+          "name": "碧潭",
+          "type": "淬火刀剑水城",
+          "population": 60000
+        }
+      ]
+    },
+    {
+      "id": "chu",
+      "name": "楚",
+      "fullName": "大楚",
+      "capital": "yunmeng",
+      "faction": "north_alliance",
+      "population": 12500000,
+      "populationRatio": "24%",
+      "geographicPosition": "大陆南方",
+      "territoryDimensions": {
+        "eastWestLi": 900,
+        "northSouthLi": 800
+      },
+      "terrain": "北部大泽平原水网纵横，中部丘陵，南部深山密林，宗族割据自治",
+      "military": {
+        "standingArmy": 180000,
+        "coreForces": "山地兵与大泽水军，南方宗族兵听族长不听朝廷"
+      },
+      "keyCities": [
+        {
+          "id": "yunmeng",
+          "name": "云梦",
+          "type": "都城/大泽水市之城",
+          "population": 1050000
+        },
+        {
+          "id": "baizuzhai",
+          "name": "百族寨",
+          "type": "南方深山宗族聚居地",
+          "population": 30000
+        },
+        {
+          "id": "wudu",
+          "name": "雾渡",
+          "type": "昭楚边境走私集散地",
+          "population": 50000
+        },
+        {
+          "id": "liancha",
+          "name": "莲汊",
+          "type": "大泽渔镇",
+          "population": 90000
+        },
+        {
+          "id": "yaowanggu",
+          "name": "药王谷",
+          "type": "深山野生药圃产地",
+          "population": 40000
+        },
+        {
+          "id": "canxiang",
+          "name": "蚕乡",
+          "type": "楚绸织染丘陵产地",
+          "population": 120000
+        }
+      ]
+    },
+    {
+      "id": "liang",
+      "name": "梁",
+      "fullName": "大梁",
+      "capital": "jincheng",
+      "faction": "south_coalition",
+      "population": 5000000,
+      "populationRatio": "10%",
+      "geographicPosition": "大陆西部",
+      "territoryDimensions": {
+        "eastWestLi": 500,
+        "northSouthLi": 600
+      },
+      "terrain": "中部河谷绿洲为核心，西部与西北延伸上千里戈壁荒漠，南部山脉阻隔",
+      "military": {
+        "standingArmy": 80000,
+        "coreForces": "商路精锐护军三万，战时雇佣西域雇佣兵"
+      },
+      "keyCities": [
+        {
+          "id": "jincheng",
+          "name": "金城",
+          "type": "都城/西域商馆商会之都",
+          "population": 650000
+        },
+        {
+          "id": "yumen_zhen",
+          "name": "玉门镇",
+          "type": "商路护卫补给中转站",
+          "population": 110000
+        },
+        {
+          "id": "dongguan",
+          "name": "东关",
+          "type": "昭梁边境最大陆路关口",
+          "population": 80000
+        },
+        {
+          "id": "quancheng",
+          "name": "泉城",
+          "type": "戈壁唯一水源绿洲城",
+          "population": 30000
+        },
+        {
+          "id": "hegu",
+          "name": "河谷",
+          "type": "引水渠网粮仓农业城",
+          "population": 160000
+        },
+        {
+          "id": "nanai",
+          "name": "南隘",
+          "type": "梁楚山道关口(冬封三月)",
+          "population": 20000
+        }
+      ]
+    },
+    {
+      "id": "chen",
+      "name": "陈",
+      "fullName": "大陈",
+      "capital": "haimen",
+      "faction": "south_coalition",
+      "population": 6500000,
+      "populationRatio": "12%",
+      "geographicPosition": "大陆东南沿海",
+      "territoryDimensions": {
+        "northSouthCoastLi": 700,
+        "inlandDepthLi": 400
+      },
+      "terrain": "东面临海，北邻澜江与昭相望，西隔丘陵河网与楚为邻，南部岛屿星罗棋布",
+      "military": {
+        "standingArmy": 100000,
+        "coreForces": "水师战船三百余艘，控制近海与澜江入海口，陆战偏弱"
+      },
+      "keyCities": [
+        {
+          "id": "haimen",
+          "name": "海门",
+          "type": "都城/市舶司海贸天然深港",
+          "population": 580000
+        },
+        {
+          "id": "yanting",
+          "name": "盐汀",
+          "type": "官营盐田海盐之都",
+          "population": 90000
+        },
+        {
+          "id": "jiangkou",
+          "name": "江口",
+          "type": "澜江入海口换装码头",
+          "population": 140000
+        },
+        {
+          "id": "longgutan",
+          "name": "龙骨滩",
+          "type": "皇家船坞与造船世家基地",
+          "population": 80000
+        },
+        {
+          "id": "shanyu",
+          "name": "珊屿",
+          "type": "南部珊瑚采集海岛中转站",
+          "population": 10000
+        },
+        {
+          "id": "qingtian",
+          "name": "青田",
+          "type": "内陆丘陵梯田米仓城",
+          "population": 120000
+        }
+      ]
+    }
+  ],
+  "natural_features": {
+    "mountain_ranges": [
+      {
+        "id": "qingping_mountains",
+        "name": "青屏山脉",
+        "length_li": 1000,
+        "orientation": "东西走向",
+        "location": "昭国与燕国之间",
+        "description": "主峰险峻高耸，大军难以翻越，是昭燕对峙天然屏障，仅数条险窄山道可通，冬季部分雪封"
+      }
+    ],
+    "rivers": [
+      {
+        "id": "luoshui",
+        "name": "洛水",
+        "length_li": 600,
+        "flow_direction": "自西向东",
+        "location": "昭国境内横贯",
+        "description": "昭国主要内陆水运枢纽，自洛口上游穿永安而过，向东汇流"
+      },
+      {
+        "id": "lanjiang",
+        "name": "澜江",
+        "length_li": 500,
+        "flow_direction": "大致东西走向",
+        "location": "昭国与陈国界河",
+        "description": "江面极其宽阔，建有官方过境渡口、江面浮市与水军水寨，东入江口汇入大海"
+      }
+    ],
+    "waters": [
+      {
+        "id": "daze",
+        "name": "大泽",
+        "area_li": 200,
+        "location": "楚国北部",
+        "description": "楚国核心水域，云梦建在泽畔，雨季水波浩瀚，水上市集与泽上行宫密布"
+      }
+    ]
+  },
+  "borders_and_passes": [
+    {
+      "id": "dongguan_pass",
+      "name": "东关",
+      "type": "陆路口岸",
+      "between": [
+        "zhao_guo",
+        "liang"
+      ],
+      "status": "official",
+      "description": "昭梁最大陆路商贸关卡，设五十步缓冲带与双国税所"
+    },
+    {
+      "id": "linlan_jiangkou_pass",
+      "name": "临澜—江口渡口",
+      "type": "水运口岸",
+      "between": [
+        "zhao_guo",
+        "chen"
+      ],
+      "status": "official",
+      "description": "澜江水运过境渡口，查验路引，两国水军联合巡航起点"
+    },
+    {
+      "id": "wudu_pass",
+      "name": "雾渡",
+      "type": "山区渡口/走私口岸",
+      "between": [
+        "zhao_guo",
+        "chu"
+      ],
+      "status": "illicit_tolerated",
+      "description": "昭楚深山交界两不管地带，秋冬借山间浓雾走私粮食与药材，双方官府默许"
+    },
+    {
+      "id": "hecheng_pass",
+      "name": "合城",
+      "type": "互市口岸",
+      "between": [
+        "yan",
+        "zhao"
+      ],
+      "status": "official",
+      "description": "燕赵唯一合法贸易口岸，铁器换战马"
+    },
+    {
+      "id": "nanai_pass",
+      "name": "南隘",
+      "type": "高山隘口",
+      "between": [
+        "liang",
+        "chu"
+      ],
+      "status": "official",
+      "description": "梁楚唯一山道关口，道狭且陡仅行人力驴马，冬季封闭三个月"
+    },
+    {
+      "id": "qingping_front",
+      "name": "青屏山防线",
+      "type": "军事边境",
+      "between": [
+        "zhao_guo",
+        "yan"
+      ],
+      "status": "military_confrontation",
+      "description": "昭国青壁城与燕国南关隔山对峙，无民间通行"
+    }
+  ],
+  "transnational_routes": [
+    {
+      "name": "昭梁官道",
+      "from": "yongan",
+      "to": "jincheng",
+      "distance_li": 1200,
+      "via": [
+        "luokou",
+        "dongguan"
+      ],
+      "travel_time": {
+        "horse_normal_days": 10,
+        "caravan_days": 18
+      }
+    },
+    {
+      "name": "昭陈水陆通道",
+      "from": "yongan",
+      "to": "haimen",
+      "distance_li": 900,
+      "via": [
+        "linlan",
+        "jiangkou"
+      ],
+      "travel_time": {
+        "ride_and_boat_days": 8,
+        "caravan_days": 16
+      }
+    },
+    {
+      "name": "昭楚南行路",
+      "from": "yongan",
+      "to": "yunmeng",
+      "distance_li": 800,
+      "via": [
+        "nanxi",
+        "wudu"
+      ],
+      "travel_time": {
+        "horse_normal_days": 7,
+        "caravan_days": 14
+      }
+    },
+    {
+      "name": "昭燕古驿道 (战时封阻)",
+      "from": "yongan",
+      "to": "fengtian",
+      "distance_li": 1800,
+      "via": [
+        "qingbicheng",
+        "nanguan"
+      ],
+      "travel_time": {
+        "horse_normal_days": 15,
+        "military_march_days": 28
+      },
+      "note": "对峙无民行"
+    },
+    {
+      "name": "昭赵东山道",
+      "from": "yongan",
+      "to": "tieling",
+      "distance_li": 1400,
+      "via": [
+        "dongqiu",
+        "guanshan"
+      ],
+      "travel_time": {
+        "horse_normal_days": 13,
+        "caravan_days": 22
+      }
+    }
+  ]
+}

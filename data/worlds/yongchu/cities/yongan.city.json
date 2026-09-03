@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0.0",
+  "id": "yongan",
+  "name": "永安城",
+  "nation_id": "zhao_guo",
+  "world_id": "yongchu",
+  "scale": {
+    "east_west_li": 12,
+    "north_south_li": 10,
+    "moat": "外带护城河",
+    "wall_gates": {
+      "inner_palace_south_gate": "承天门 (皇城正门)",
+      "inner_palace_east_gate": "东华门 (官员当值偏门)",
+      "outer_city_gates": "unresolved"
+    }
+  },
+  "spatial_structure": {
+    "river": {
+      "name": "洛水",
+      "flow_direction": "自西向东穿城而过",
+      "role": "将永安城分为南北两半，两岸设渡船往来"
+    },
+    "urban_character": {
+      "curfew": "全年不设宵禁，夜市极度繁荣，交易至四更",
+      "layout": "坊市不分离，住宅与商铺混杂",
+      "palace_position": "皇城位于城市中轴线偏北，背靠景山，南临承天门大街"
+    }
+  },
+  "four_great_merchant_families": [
+    {
+      "family": "魏家",
+      "leader": "魏长川",
+      "domain": "漕运霸主",
+      "base": "魏府·水云坞 (洛水南街)，控管沿江三十六仓与千名纤夫水手"
+    },
+    {
+      "family": "薛家",
+      "leader": "薛少陵",
+      "domain": "钱庄柜坊金融汇兑",
+      "base": "薛府 (城东富春坊) 与薛氏通汇柜坊总号 (城中心金汇街)"
+    },
+    {
+      "family": "杜家",
+      "leader": "杜云湘",
+      "domain": "布帛生丝与女红行会",
+      "base": "杜府 (城南锦绣街) 与杜氏大绸庄"
+    },
+    {
+      "family": "严家",
+      "leader": "严横",
+      "domain": "陆运镖行与车马辎重",
+      "base": "严府 (城西长风街) 与长风镖局永安总局、大型车马行"
+    },
+    {
+      "alliance_hub": "四宜堂",
+      "location": "金水合流角 (偏僻水巷深处)",
+      "nature": "四姓同盟议事枢纽，四印合一密厅"
+    }
+  ],
+  "top_court_and_royal_clans": [
+    {
+      "clan": "旧家",
+      "nature": "顶级世家 (军政商合一)",
+      "base": "旧家主宅 (城东长乐巷三进大宅)、凌霄阁、旧氏布庄、旧氏药局、城南四大货栈、洛水泊位"
+    },
+    {
+      "clan": "苏氏宗室",
+      "nature": "亲王宗室 (掌管宗人府)",
+      "base": "靖王府、瑞王府 (城东王府街区)、宝檀阁、松风斋"
+    },
+    {
+      "clan": "灵家",
+      "nature": "清流言官与司法世家 (御史台/大理寺)",
+      "base": "灵家旧宅 (城南太常街)、明镜堂 (府衙大街)、洗心茶庄 (城外西郊半山腰)"
+    },
+    {
+      "clan": "谢家",
+      "nature": "旧世家清流 (垄断永安七成文教书市)",
+      "base": "谢氏旧宅 (城南太常街)、谢家书局、谢家笔墨铺 (城南文昌街)"
+    }
+  ],
+  "districts": [
+    {
+      "id": "city_center",
+      "name": "城中心",
+      "theme": "皇城与行政金融医药中枢",
+      "position": "城市中心偏北至偏南",
+      "streets": [
+        "承天门大街",
+        "府衙大街",
+        "金汇街",
+        "百草街"
+      ],
+      "sub_structures": [
+        "昭国皇宫 (外朝承天门/太极殿，内廷凝翠阁/承乾宫/慈宁宫/太液池)"
+      ]
+    },
+    {
+      "id": "city_east",
+      "name": "城东",
+      "theme": "权贵商业与王府世家",
+      "position": "城东区",
+      "streets": [
+        "东市主街",
+        "长乐巷",
+        "王府街",
+        "富春坊",
+        "安平街",
+        "烟火巷",
+        "旧家后巷",
+        "四方坊"
+      ]
+    },
+    {
+      "id": "city_south",
+      "name": "城南",
+      "theme": "文教与仓储物流工坊",
+      "position": "城南区",
+      "streets": [
+        "文昌街",
+        "锦绣街",
+        "南货大道",
+        "太常街"
+      ]
+    },
+    {
+      "id": "city_west",
+      "name": "城西",
+      "theme": "武行与车马行",
+      "position": "城西区",
+      "streets": [
+        "长风街",
+        "茶市街",
+        "西市"
+      ]
+    },
+    {
+      "id": "luoshui_north",
+      "name": "洛水北岸",
+      "theme": "水运与情报高楼",
+      "position": "洛水穿城以北沿岸",
+      "streets": [
+        "洛水北街"
+      ]
+    },
+    {
+      "id": "luoshui_south",
+      "name": "洛水南岸",
+      "theme": "水运、漕运总堂与风月夜市",
+      "position": "洛水穿城以南沿岸",
+      "streets": [
+        "洛水南街",
+        "瓦肆勾栏街",
+        "平康巷",
+        "洛水夜市"
+      ]
+    },
+    {
+      "id": "jinshui_junction",
+      "name": "金水合流角",
+      "theme": "偏僻水巷与四姓密盟",
+      "position": "偏僻水系汇流处",
+      "streets": [
+        "金水合流角"
+      ]
+    },
+    {
+      "id": "west_suburb",
+      "name": "城外西郊",
+      "theme": "隐秘言官指挥部",
+      "position": "城外西郊半山腰",
+      "streets": [
+        "城外西郊"
+      ]
+    }
+  ],
+  "locations_file": "./yongan.locations.json"
+}

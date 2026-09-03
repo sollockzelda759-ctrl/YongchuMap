@@ -16,6 +16,7 @@ import SettlementEngine from './src/core/SettlementEngine.js';
 import GenerationEvents from './src/events/GenerationEvents.js';
 import MvuAdapter from './src/adapters/MvuAdapter.js';
 import DatabaseAdapter from './src/adapters/DatabaseAdapter.js';
+import MapDataLoader from './src/data/MapDataLoader.js';
 import MapPanel from './src/ui/MapPanel.js';
 
 // ── 重复初始化保护 ──
@@ -58,8 +59,11 @@ class YongchuMap {
     this.mvuAdapter = new MvuAdapter(this.store);
     this.dbAdapter = new DatabaseAdapter(this.store);
 
+    // 数据加载器
+    this.dataLoader = new MapDataLoader();
+
     // UI
-    this.panel = new MapPanel(this.store, this.registry, this.travelEngine);
+    this.panel = new MapPanel(this.store, this.registry, this.travelEngine, this, this.dataLoader);
   }
 
   // ── World Pack配置 ──
@@ -373,6 +377,9 @@ class YongchuMap {
     }
     this.events.unregister();
     this.mapContext.uninject();
+    if (this.panel && typeof this.panel.destroy === 'function') {
+      this.panel.destroy();
+    }
     this.initialized = false;
     this._destroyed = true;
     if (typeof window !== 'undefined') {

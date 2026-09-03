@@ -14,6 +14,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+let failedChecks = 0;
+const nativeConsoleLog = console.log.bind(console);
+console.log = (...args) => {
+  if (args.some(value => typeof value === 'string' && value.includes('✗'))) failedChecks++;
+  nativeConsoleLog(...args);
+};
 
 async function runTests() {
   console.log('========== YongchuMap Core v0.1.2 测试开始 ==========\n');
@@ -460,6 +466,7 @@ async function runTests() {
 
 
   // ── 总结 ──
+  if (failedChecks > 0) throw new Error(`${failedChecks} 项 Core 检查失败`);
   console.log('========== 测试总结 ==========');
   console.log('  地点总数:', registry.getTotalLocationCount());
   console.log('  schema版本:', store.getState().schema_version);

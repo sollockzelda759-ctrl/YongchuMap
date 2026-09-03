@@ -1,0 +1,380 @@
+/* ============================================================
+   MapPanel.css —— 永初地舆图古风 UI 骨架样式 (Part 1: 按钮/遮罩/容器)
+   ============================================================ */
+
+.ycm-btn-map-entry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 12px;
+  margin: 2px 4px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(38, 30, 24, 0.88), rgba(58, 44, 34, 0.92));
+  color: #f1e7d0;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.ycm-btn-map-entry:hover {
+  background: linear-gradient(135deg, rgba(58, 44, 34, 0.95), rgba(80, 60, 45, 0.95));
+  border-color: rgba(240, 210, 110, 0.85);
+  color: #fff8eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+.ycm-btn-map-entry:active {
+  transform: translateY(0);
+}
+.ycm-btn-map-entry.floating-fallback {
+  position: fixed;
+  right: 18px;
+  bottom: 140px;
+  z-index: 2147483640;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+/* 遮罩层 */
+#yongchu-map-modal {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2147483646;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 12, 16, 0.68);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 20px;
+  box-sizing: border-box;
+}
+#yongchu-map-modal.active {
+  display: flex;
+}
+
+/* 主容器 */
+.ycm-container {
+  position: relative;
+  width: 92vw;
+  max-width: 960px;
+  height: 84vh;
+  max-height: 720px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(20, 22, 26, 0.88);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  color: #eae5d9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  overflow: hidden;
+}
+
+.ycm-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: rgba(212, 175, 55, 0.7);
+  pointer-events: none;
+}
+.ycm-corner-tl { top: 4px; left: 4px; border-top: 2px solid; border-left: 2px solid; }
+.ycm-corner-tr { top: 4px; right: 4px; border-top: 2px solid; border-right: 2px solid; }
+.ycm-corner-bl { bottom: 4px; left: 4px; border-bottom: 2px solid; border-left: 2px solid; }
+.ycm-corner-br { bottom: 4px; right: 4px; border-bottom: 2px solid; border-right: 2px solid; }
+
+/* 头部 */
+.ycm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: linear-gradient(180deg, rgba(34, 38, 46, 0.95), rgba(24, 28, 34, 0.95));
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+.ycm-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ycm-title-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #e5c158;
+  letter-spacing: 1px;
+}
+.ycm-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #a39e93;
+}
+.ycm-breadcrumb-item {
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.ycm-breadcrumb-item:hover {
+  color: #f7eed7;
+  background: rgba(212, 175, 55, 0.15);
+}
+.ycm-breadcrumb-item.active {
+  color: #f3e5c8;
+  font-weight: 600;
+  cursor: default;
+}
+.ycm-breadcrumb-item.active:hover {
+  background: none;
+}
+.ycm-breadcrumb-sep {
+  color: rgba(212, 175, 55, 0.5);
+  font-size: 11px;
+}
+.ycm-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* ============================================================
+   MapPanel.css —— 永初地舆图古风 UI 骨架样式 (Part 2: 宣纸内容/网格/卡片/地点列表)
+   ============================================================ */
+
+.ycm-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+  background: radial-gradient(circle at 50% 20%, rgba(32, 36, 44, 0.6), rgba(16, 18, 22, 0.95));
+}
+.ycm-body::-webkit-scrollbar {
+  width: 6px;
+}
+.ycm-body::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.25);
+  border-radius: 3px;
+}
+.ycm-current-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  margin-bottom: 18px;
+  background: linear-gradient(90deg, rgba(246, 241, 230, 0.92), rgba(235, 228, 214, 0.92));
+  color: #2b261f;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-left: 4px solid #b8860b;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.ycm-status-text {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.ycm-status-text strong {
+  color: #8c2d19;
+  font-weight: 700;
+}
+.ycm-status-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  background: rgba(140, 45, 25, 0.12);
+  color: #8c2d19;
+  border: 1px solid rgba(140, 45, 25, 0.3);
+  border-radius: 10px;
+  font-weight: 600;
+}
+.ycm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.ycm-card {
+  background: linear-gradient(145deg, rgba(250, 247, 240, 0.94), rgba(238, 232, 220, 0.9));
+  border: 1px solid rgba(190, 160, 110, 0.45);
+  border-radius: 8px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #2e2820;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+.ycm-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  border-color: #b8860b;
+  background: #fffdf7;
+}
+.ycm-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ycm-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1612;
+  letter-spacing: 0.5px;
+}
+.ycm-card-tag {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: rgba(184, 134, 11, 0.15);
+  color: #8b5a00;
+  border: 1px solid rgba(184, 134, 11, 0.3);
+}
+.ycm-card-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #5c5346;
+}
+.ycm-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-size: 12px;
+  color: #8b5a00;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* 城市层与69地点列表流 */
+.ycm-city-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ycm-city-banner {
+  background: linear-gradient(135deg, rgba(34, 40, 52, 0.9), rgba(24, 28, 38, 0.95));
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.ycm-city-stats {
+  display: flex;
+  gap: 20px;
+}
+.ycm-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ycm-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f5d475;
+}
+.ycm-stat-label {
+  font-size: 11px;
+  color: #9ea4b0;
+}
+.ycm-locations-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 14px;
+  background: rgba(14, 16, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+.ycm-loc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  background: rgba(250, 247, 240, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  color: #e2ddd3;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+.ycm-loc-pill.is-current {
+  background: rgba(184, 134, 11, 0.35);
+  border-color: #f5d475;
+  color: #fff8e7;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(245, 212, 117, 0.3);
+}
+.ycm-loc-pill:hover {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.5);
+}
+.ycm-loc-category {
+  font-size: 10px;
+  opacity: 0.75;
+}
+.ycm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 18px;
+  background: rgba(18, 20, 24, 0.95);
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  font-size: 11px;
+  color: #7d786d;
+}
+.ycm-footer-tag {
+  color: #c9a742;
+}
+
+.ycm-btn-back {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 4px;
+  color: #ded7c6;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ycm-btn-back:hover {
+  background: rgba(212, 175, 55, 0.2);
+  color: #ffffff;
+}
+.ycm-btn-close {
+  background: transparent;
+  border: none;
+  color: #a39e93;
+  font-size: 18px;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.ycm-btn-close:hover {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.15);
+}

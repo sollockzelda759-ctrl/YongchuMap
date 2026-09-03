@@ -1,10 +1,11 @@
 {
   "meta": {
-    "source": "永初大陆角色卡内置地图",
+    "source": "《永初大陆》正式世界卡条目94设定 + 旧地图原型legacy_reference兼容",
     "city": "永安城",
     "coordinate_system": "东西12里(x:0~12), 南北10里(y:0~10), 1单位≈1里≈500米",
     "total_locations": 69,
-    "extracted_at": "2026-09-02T09:37:32.651Z"
+    "extracted_at": "2026-09-02T09:37:32.651Z",
+    "schema_version": "1.0.0"
   },
   "locations": [
     {
@@ -21,7 +22,19 @@
         "旧氏布庄",
         "沈氏绸缎铺",
         "旧家铺面"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "东市主街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 9.3,
+        "grid_y": 5.6,
+        "width": 2.4,
+        "height": 0.8,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "changle_xiang",
@@ -36,7 +49,19 @@
       "sub_areas": [
         "旧家宅邸",
         "旧氏药局"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "长乐巷",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 8.3,
+        "grid_y": 6.4,
+        "width": 1.8,
+        "height": 1,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "wangfu_jie",
@@ -52,7 +77,19 @@
         "靖王府",
         "瑞王府",
         "宝檀阁"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "宗室王府街区",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 8,
+        "grid_y": 7.8,
+        "width": 2.8,
+        "height": 1.2,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "fuchun_fang",
@@ -66,7 +103,19 @@
       "atmosphere": "巨贾豪门居所，三进重院带大花园",
       "sub_areas": [
         "薛府"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "富春坊",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 10.6,
+        "grid_y": 7.8,
+        "width": 1.3,
+        "height": 1.1,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "anping_jie",
@@ -81,7 +130,19 @@
       "sub_areas": [
         "宋家古玩",
         "宋家典当"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "安平街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 10.8,
+        "grid_y": 5.3,
+        "width": 0.9,
+        "height": 0.5,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "yanhuo_xiang",
@@ -95,7 +156,19 @@
       "atmosphere": "深巷，市井烟火气浓，小食铺林立",
       "sub_areas": [
         "林家面铺"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "烟火巷",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 8.3,
+        "grid_y": 5.7,
+        "width": 0.5,
+        "height": 0.35,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "jiujia_houxiang",
@@ -109,7 +182,19 @@
       "atmosphere": "旧家宅邸后巷，僻静少人",
       "sub_areas": [
         "陆记包子铺"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "旧家后巷",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 9.1,
+        "grid_y": 6.5,
+        "width": 0.35,
+        "height": 0.25,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "sifang_fang",
@@ -125,7 +210,19 @@
         "梁国西域货栈",
         "陈国海货铺",
         "楚国漆器行"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "四方坊",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 11,
+        "grid_y": 5.6,
+        "width": 0.9,
+        "height": 0.7,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "jiujia_zhaidi",
@@ -143,7 +240,20 @@
         "东跨院",
         "西跨院",
         "后院"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "长乐巷",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "旧家主宅",
+      "legacy_reference": {
+        "grid_x": 8.6,
+        "grid_y": 6.7,
+        "width": 1.1,
+        "height": 0.8,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "jiushi_buzhuang",
@@ -159,7 +269,19 @@
         "前堂展布",
         "后院绣坊",
         "密库"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "东市主街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 9.6,
+        "grid_y": 5.8,
+        "width": 0.55,
+        "height": 0.4,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "jiushi_yaoju",
@@ -175,7 +297,19 @@
         "前堂看诊抓药",
         "后院炮制坊",
         "恒温库房"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "长乐巷",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 8.3,
+        "grid_y": 7.5,
+        "width": 0.45,
+        "height": 0.35,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "jingwang_fu",
@@ -192,7 +326,19 @@
         "正堂",
         "内宅",
         "花园"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "宗室王府街区",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 8.2,
+        "grid_y": 8,
+        "width": 0.9,
+        "height": 0.8,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "ruiwang_fu",
@@ -209,7 +355,19 @@
         "正堂",
         "内宅",
         "花园"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "宗室王府街区",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 9.5,
+        "grid_y": 8.1,
+        "width": 0.9,
+        "height": 0.8,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "baotan_ge",
@@ -224,7 +382,19 @@
       "sub_areas": [
         "前堂",
         "后院库房"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "宗室王府街区",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 8,
+        "grid_y": 8.9,
+        "width": 0.4,
+        "height": 0.35,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "xue_fu",
@@ -242,7 +412,20 @@
         "内宅",
         "私家库房",
         "核账静室"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "富春坊",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "薛氏主宅（薛府）",
+      "legacy_reference": {
+        "grid_x": 10.8,
+        "grid_y": 8,
+        "width": 1,
+        "height": 0.8,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "linjia_mianpu",
@@ -257,7 +440,19 @@
       "sub_areas": [
         "铺面",
         "后厨"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "烟火巷",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 8.8,
+        "grid_y": 5.8,
+        "width": 0.28,
+        "height": 0.25,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "luji_baozipu",
@@ -271,7 +466,19 @@
       "atmosphere": "陆宽隐姓埋名的包子摊，热气腾腾",
       "sub_areas": [
         "铺面"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "旧家后巷",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 9.5,
+        "grid_y": 6.4,
+        "width": 0.22,
+        "height": 0.2,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "shenshi_chouduanpu",
@@ -286,7 +493,20 @@
       "sub_areas": [
         "铺面",
         "库房"
-      ]
+      ],
+      "district_id": "city_east",
+      "street": "东市主街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "沈氏绸缎铺总店",
+      "legacy_reference": {
+        "grid_x": 10.5,
+        "grid_y": 5.7,
+        "width": 0.5,
+        "height": 0.35,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "wenchang_jie",
@@ -303,7 +523,19 @@
         "谢家笔墨铺",
         "灵家书铺",
         "松风斋"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "文昌街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 3.3,
+        "grid_y": 4,
+        "width": 2,
+        "height": 0.6,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "jinxiu_jie",
@@ -319,7 +551,19 @@
         "杜府",
         "杜氏大绸庄",
         "织染工坊群"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "锦绣街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 1.6,
+        "grid_y": 3.6,
+        "width": 1.6,
+        "height": 0.9,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "nanhuo_dadao",
@@ -333,7 +577,19 @@
       "atmosphere": "物资集散地，大型货栈仓库林立，车马络绎",
       "sub_areas": [
         "旧家货栈×4"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "南货大道",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 1.3,
+        "grid_y": 3,
+        "width": 2.2,
+        "height": 0.55,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "taichang_jie",
@@ -350,7 +606,19 @@
         "云家宅邸",
         "灵家旧宅",
         "太常寺"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "太常街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 4.3,
+        "grid_y": 3.1,
+        "width": 2.8,
+        "height": 0.6,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "jingzhao_fu",
@@ -366,7 +634,19 @@
         "前院升堂大堂",
         "东跨院六曹",
         "西跨院京兆狱"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "府衙大街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 4.8,
+        "grid_y": 6.3,
+        "width": 1,
+        "height": 0.75,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "facao_yamen",
@@ -381,7 +661,19 @@
       "sub_areas": [
         "办公大堂",
         "卷宗库"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "府衙大街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 4.6,
+        "grid_y": 7.2,
+        "width": 0.5,
+        "height": 0.4,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "mingjing_tang",
@@ -397,7 +689,19 @@
         "前堂律令书馆",
         "中院状师行会",
         "后院密档库"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "府衙大街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 5.7,
+        "grid_y": 7.1,
+        "width": 0.5,
+        "height": 0.4,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "zongren_fu",
@@ -412,7 +716,19 @@
       "sub_areas": [
         "办公大堂",
         "玉牒库"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "府衙大街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 6.5,
+        "grid_y": 7.2,
+        "width": 0.5,
+        "height": 0.4,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "xie_fu",
@@ -429,7 +745,20 @@
         "正堂",
         "内宅",
         "书房"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "太常街周边",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "谢氏旧宅",
+      "legacy_reference": {
+        "grid_x": 4.6,
+        "grid_y": 3.3,
+        "width": 0.7,
+        "height": 0.55,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "yunjia_zhaidi",
@@ -445,7 +774,19 @@
         "前院",
         "正堂",
         "内宅"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "太常街周边",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 5.5,
+        "grid_y": 3.3,
+        "width": 0.6,
+        "height": 0.5,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "lingjia_jiuzhai",
@@ -462,7 +803,19 @@
         "正堂",
         "内宅",
         "书房"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "太常街周边",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 6.3,
+        "grid_y": 3.3,
+        "width": 0.6,
+        "height": 0.5,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "taichang_si",
@@ -477,7 +830,19 @@
       "sub_areas": [
         "办公大堂",
         "礼器库"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "太常街周边",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 7.1,
+        "grid_y": 3.3,
+        "width": 0.55,
+        "height": 0.45,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "du_fu",
@@ -494,7 +859,20 @@
         "正堂",
         "内宅",
         "织染工坊"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "锦绣街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "杜氏主宅（杜府）",
+      "legacy_reference": {
+        "grid_x": 1.8,
+        "grid_y": 3.8,
+        "width": 0.85,
+        "height": 0.7,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "dushi_dachouzhuang",
@@ -509,7 +887,19 @@
       "sub_areas": [
         "前堂",
         "库房"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "锦绣街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 2.7,
+        "grid_y": 3.7,
+        "width": 0.55,
+        "height": 0.45,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "xiejia_shuju",
@@ -524,7 +914,19 @@
       "sub_areas": [
         "铺面",
         "库房"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "文昌街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 3.6,
+        "grid_y": 4.1,
+        "width": 0.5,
+        "height": 0.35,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "xiejia_bimopu",
@@ -538,7 +940,19 @@
       "atmosphere": "八间笔墨铺，文房四宝",
       "sub_areas": [
         "铺面"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "文昌街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 4.2,
+        "grid_y": 4.1,
+        "width": 0.32,
+        "height": 0.25,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "lingjia_shupu",
@@ -552,7 +966,19 @@
       "atmosphere": "两间，专印言官奏疏与律法注解",
       "sub_areas": [
         "铺面"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "文昌街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 4.6,
+        "grid_y": 4.1,
+        "width": 0.28,
+        "height": 0.22,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "songfeng_zhai",
@@ -567,7 +993,19 @@
       "sub_areas": [
         "铺面",
         "内室"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "文昌街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 3.3,
+        "grid_y": 4.5,
+        "width": 0.32,
+        "height": 0.25,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "jiujia_huozhan",
@@ -582,7 +1020,20 @@
       "sub_areas": [
         "库房",
         "管事房"
-      ]
+      ],
+      "district_id": "city_south",
+      "street": "南货大道",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "旧家大型货栈",
+      "legacy_reference": {
+        "grid_x": 1.6,
+        "grid_y": 3.1,
+        "width": 1,
+        "height": 0.45,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "xueshi_tonghui_guifang",
@@ -597,7 +1048,20 @@
       "sub_areas": [
         "前堂",
         "后院金库"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "金汇街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "薛氏通汇柜坊总号",
+      "legacy_reference": {
+        "grid_x": 4.8,
+        "grid_y": 5.3,
+        "width": 0.6,
+        "height": 0.45,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "wanjia_wantong_qianzhuang",
@@ -612,7 +1076,20 @@
       "sub_areas": [
         "前堂",
         "库房"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "金汇街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "万家万通钱庄总号",
+      "legacy_reference": {
+        "grid_x": 5.6,
+        "grid_y": 5.3,
+        "width": 0.5,
+        "height": 0.4,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "wanjia_wanfeng_dangpu",
@@ -627,7 +1104,19 @@
       "sub_areas": [
         "铺面",
         "库房"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "金汇街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 6.3,
+        "grid_y": 5.3,
+        "width": 0.5,
+        "height": 0.4,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "baijia_yaohang",
@@ -642,7 +1131,20 @@
       "sub_areas": [
         "铺面",
         "库房"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "百草街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "白家白氏药材总行",
+      "legacy_reference": {
+        "grid_x": 4.8,
+        "grid_y": 4.6,
+        "width": 0.5,
+        "height": 0.35,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "baijia_yiguan",
@@ -657,7 +1159,20 @@
       "sub_areas": [
         "诊堂",
         "药柜"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "百草街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "白家百年医馆",
+      "legacy_reference": {
+        "grid_x": 5.5,
+        "grid_y": 4.6,
+        "width": 0.4,
+        "height": 0.3,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "changfeng_jie",
@@ -673,7 +1188,19 @@
         "严府",
         "长风镖局",
         "严家车马行"
-      ]
+      ],
+      "district_id": "city_west",
+      "street": "长风街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 0.7,
+        "grid_y": 5.3,
+        "width": 2.2,
+        "height": 1.7,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "chashi_jie",
@@ -688,7 +1215,19 @@
       "sub_areas": [
         "叶家茶叶铺",
         "叶家清净茶室"
-      ]
+      ],
+      "district_id": "city_west",
+      "street": "茶市街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 1.4,
+        "grid_y": 3.3,
+        "width": 1.3,
+        "height": 0.5,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "xishi",
@@ -702,7 +1241,19 @@
       "atmosphere": "城西核心商业区，武行铁匠铺茶摊酒肆混杂，人员混杂",
       "sub_areas": [
         "各类市井商铺"
-      ]
+      ],
+      "district_id": "city_west",
+      "street": "西市",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 0.7,
+        "grid_y": 3.6,
+        "width": 2.2,
+        "height": 1.3,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "yan_fu",
@@ -720,7 +1271,20 @@
         "正堂",
         "内宅",
         "马厩"
-      ]
+      ],
+      "district_id": "city_west",
+      "street": "长风街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "严氏主宅（严府）",
+      "legacy_reference": {
+        "grid_x": 0.9,
+        "grid_y": 5.9,
+        "width": 1.3,
+        "height": 1,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "changfeng_biaoju",
@@ -736,7 +1300,20 @@
         "前堂",
         "后院镖师通铺",
         "马厩"
-      ]
+      ],
+      "district_id": "city_west",
+      "street": "长风街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "严家长风镖局永安总局",
+      "legacy_reference": {
+        "grid_x": 2,
+        "grid_y": 5.4,
+        "width": 0.7,
+        "height": 0.5,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "yanjia_chemhang",
@@ -752,7 +1329,20 @@
         "铺面",
         "车场",
         "马厩"
-      ]
+      ],
+      "district_id": "city_west",
+      "street": "长风街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "严家大型车马行",
+      "legacy_reference": {
+        "grid_x": 0.7,
+        "grid_y": 4.9,
+        "width": 0.5,
+        "height": 0.4,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "yejia_chayepu",
@@ -767,7 +1357,19 @@
       "sub_areas": [
         "铺面",
         "库房"
-      ]
+      ],
+      "district_id": "city_west",
+      "street": "茶市街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 1.2,
+        "grid_y": 3.4,
+        "width": 0.32,
+        "height": 0.28,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "yejia_chashi",
@@ -781,7 +1383,19 @@
       "atmosphere": "两处清净茶室",
       "sub_areas": [
         "茶室"
-      ]
+      ],
+      "district_id": "city_west",
+      "street": "茶市街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 2.8,
+        "grid_y": 3.4,
+        "width": 0.28,
+        "height": 0.22,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "huangcheng",
@@ -800,7 +1414,19 @@
         "承乾宫",
         "慈宁宫",
         "中书台"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "承天门大街北侧",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 4,
+        "grid_y": 8.2,
+        "width": 4,
+        "height": 1.8,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "zhaoguo_huanggong",
@@ -815,7 +1441,20 @@
       "sub_areas": [
         "外朝太极殿",
         "内廷凝翠阁承乾宫慈宁宫"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "皇城内",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "昭国皇宫",
+      "legacy_reference": {
+        "grid_x": 5.3,
+        "grid_y": 8.6,
+        "width": 1.4,
+        "height": 1,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "zhongshu_tai",
@@ -830,7 +1469,19 @@
       "sub_areas": [
         "值房",
         "文书库"
-      ]
+      ],
+      "district_id": "city_center",
+      "street": "皇城外朝偏殿",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 7,
+        "grid_y": 8.8,
+        "width": 0.5,
+        "height": 0.4,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "luoshui_beijie",
@@ -846,7 +1497,19 @@
         "凌霄阁",
         "旧家泊位",
         "临江仓库"
-      ]
+      ],
+      "district_id": "luoshui_north",
+      "street": "洛水北街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 3.3,
+        "grid_y": 2.8,
+        "width": 3.8,
+        "height": 0.4,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "luoshui_nanjie",
@@ -863,7 +1526,19 @@
         "魏家漕运",
         "陆家酒坊",
         "严家漕运"
-      ]
+      ],
+      "district_id": "luoshui_south",
+      "street": "洛水南街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 4.3,
+        "grid_y": 1.7,
+        "width": 4.2,
+        "height": 0.35,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "jinshui_heloujiao",
@@ -877,7 +1552,19 @@
       "atmosphere": "偏僻水巷深处，两条水道交汇处，隐秘僻静",
       "sub_areas": [
         "四宜堂"
-      ]
+      ],
+      "district_id": "jinshui_junction",
+      "street": "金水合流角",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 3.8,
+        "grid_y": 1.5,
+        "width": 0.6,
+        "height": 0.35,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "wasi_goulan_jie",
@@ -891,7 +1578,19 @@
       "atmosphere": "瓦肆勾栏街区，酒楼茶馆密集，夜市繁华",
       "sub_areas": [
         "醉春楼"
-      ]
+      ],
+      "district_id": "luoshui_south",
+      "street": "瓦肆勾栏街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 6.9,
+        "grid_y": 1.7,
+        "width": 1.1,
+        "height": 0.45,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "pingkang_xiang",
@@ -905,7 +1604,19 @@
       "atmosphere": "洛水南岸偏巷，风月场所集中",
       "sub_areas": [
         "春风阁"
-      ]
+      ],
+      "district_id": "luoshui_south",
+      "street": "平康巷",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 8.2,
+        "grid_y": 1.7,
+        "width": 0.55,
+        "height": 0.35,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "luoshui_yeishi",
@@ -919,7 +1630,19 @@
       "atmosphere": "沿河摆摊交易至四更，中秋有洛水灯会，灯火通明",
       "sub_areas": [
         "各类夜市摊贩"
-      ]
+      ],
+      "district_id": "luoshui_south",
+      "street": "沿洛水南街与北街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 2.8,
+        "grid_y": 2.7,
+        "width": 5.4,
+        "height": 0.45,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "lingxiao_ge",
@@ -936,7 +1659,19 @@
         "二三楼雅座",
         "四五楼密间",
         "顶楼摘星台"
-      ]
+      ],
+      "district_id": "luoshui_north",
+      "street": "洛水北街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 5,
+        "grid_y": 2.9,
+        "width": 0.55,
+        "height": 0.45,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "jiujia_bowei",
@@ -951,7 +1686,20 @@
       "sub_areas": [
         "泊位",
         "仓库"
-      ]
+      ],
+      "district_id": "luoshui_north",
+      "street": "洛水北街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "旧家洛水泊位",
+      "legacy_reference": {
+        "grid_x": 3.3,
+        "grid_y": 2.8,
+        "width": 0.7,
+        "height": 0.22,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "weifu_shuiyunwu",
@@ -969,7 +1717,20 @@
         "内宅",
         "私家泊位",
         "暗渠"
-      ]
+      ],
+      "district_id": "luoshui_south",
+      "street": "洛水南街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "official_name": "魏氏主宅（魏府·水云坞）",
+      "legacy_reference": {
+        "grid_x": 5.3,
+        "grid_y": 1.6,
+        "width": 0.85,
+        "height": 0.55,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "weijia_caoyun_zongtang",
@@ -984,7 +1745,19 @@
       "sub_areas": [
         "总堂",
         "私仓群"
-      ]
+      ],
+      "district_id": "luoshui_south",
+      "street": "洛水南街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 6.6,
+        "grid_y": 1.6,
+        "width": 0.65,
+        "height": 0.45,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "lujia_jiufang",
@@ -999,7 +1772,19 @@
       "sub_areas": [
         "作坊",
         "铺面"
-      ]
+      ],
+      "district_id": "luoshui_south",
+      "street": "洛水南街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 4.8,
+        "grid_y": 1.8,
+        "width": 0.32,
+        "height": 0.28,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "yanjia_caoyun_tangkou",
@@ -1014,7 +1799,19 @@
       "sub_areas": [
         "堂口",
         "库房"
-      ]
+      ],
+      "district_id": "luoshui_south",
+      "street": "洛水南街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 6,
+        "grid_y": 1.3,
+        "width": 0.38,
+        "height": 0.28,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "siyi_tang",
@@ -1029,7 +1826,19 @@
       "sub_areas": [
         "前堂",
         "密厅"
-      ]
+      ],
+      "district_id": "jinshui_junction",
+      "street": "金水合流角",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 4.3,
+        "grid_y": 1.4,
+        "width": 0.38,
+        "height": 0.32,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "zuichun_lou",
@@ -1046,7 +1855,19 @@
         "二楼雅座",
         "三楼头牌居所",
         "后院"
-      ]
+      ],
+      "district_id": "luoshui_south",
+      "street": "瓦肆勾栏街",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 7.4,
+        "grid_y": 1.5,
+        "width": 0.45,
+        "height": 0.35,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "chunfeng_ge",
@@ -1061,7 +1882,19 @@
       "sub_areas": [
         "一楼大堂隔间",
         "二楼留宿厢房"
-      ]
+      ],
+      "district_id": "luoshui_south",
+      "street": "平康巷",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": 8.3,
+        "grid_y": 1.8,
+        "width": 0.38,
+        "height": 0.3,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     },
     {
       "id": "xixin_chazhuang",
@@ -1077,7 +1910,19 @@
         "外围品茶雅座",
         "内院清流议事厅",
         "后山秘径"
-      ]
+      ],
+      "district_id": "west_suburb",
+      "street": "西郊半山腰",
+      "city_id": "yongan",
+      "nation_id": "zhao_guo",
+      "world_id": "yongchu",
+      "legacy_reference": {
+        "grid_x": -1.8,
+        "grid_y": 0.4,
+        "width": 1,
+        "height": 0.7,
+        "note": "来自旧地图原型网格(东西12×南北10)，非正式几何绝对坐标"
+      }
     }
   ]
 }
