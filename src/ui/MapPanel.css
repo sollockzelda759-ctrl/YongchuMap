@@ -41,6 +41,48 @@
   font-size: 14px;
 }
 
+/* ============================================================
+   浮动可拖拽快捷地图按钮 (Floating Draggable Button)
+   ============================================================ */
+.ycm-floating-btn {
+  position: fixed;
+  z-index: 2147483645;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(32, 26, 20, 0.94), rgba(48, 36, 26, 0.96));
+  color: #f7eed7;
+  border: 1px solid rgba(212, 175, 55, 0.7);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 0 10px rgba(212, 175, 55, 0.25);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+.ycm-floating-btn:active {
+  cursor: grabbing;
+}
+.ycm-floating-btn:hover {
+  border-color: rgba(245, 215, 120, 0.95);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55), 0 0 16px rgba(212, 175, 55, 0.45);
+  color: #ffffff;
+}
+.ycm-floating-btn .ycm-floating-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+.ycm-floating-btn .ycm-floating-text {
+  line-height: 1;
+}
+
 /* 遮罩层 */
 #yongchu-map-modal {
   position: fixed;
@@ -377,4 +419,409 @@
 .ycm-btn-close:hover {
   color: #ff6b6b;
   background: rgba(255, 107, 107, 0.15);
+}
+
+
+/* ============================================================
+   永安城布局参考画布样式 (Part 1: 容器/视口/世界/城区)
+   ============================================================ */
+.ycm-city-view-container {
+  display: flex;
+  height: 540px;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ycm-map-viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #12151b;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 8px;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.7);
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
+}
+.ycm-map-viewport:active {
+  cursor: grabbing;
+}
+
+.ycm-map-world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1000px;
+  height: 750px;
+  transform-origin: 0 0;
+  background: #181c24;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.ycm-layer-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ycm-map-svg-bg {
+  width: 100%;
+  height: 100%;
+}
+
+.ycm-layer-districts {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+.ycm-district-zone {
+  position: absolute;
+  border: 1px dashed rgba(212, 175, 55, 0.25);
+  background: rgba(212, 175, 55, 0.03);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.ycm-district-zone:hover {
+  background: rgba(212, 175, 55, 0.08);
+  border-color: rgba(212, 175, 55, 0.5);
+}
+.ycm-district-label {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(212, 175, 55, 0.65);
+  letter-spacing: 1px;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================================
+   永安城布局参考画布样式 (Part 2: 标记点/说明/控制器)
+   ============================================================ */
+.ycm-layer-locations {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+.ycm-map-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.15s ease, z-index 0.15s ease;
+}
+.ycm-map-marker:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+  z-index: 30;
+}
+.ycm-marker-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d4af37;
+  border: 1.5px solid #1a1612;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
+}
+.ycm-map-marker.is-key .ycm-marker-dot {
+  width: 11px;
+  height: 11px;
+  background: #e6a817;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 8px rgba(230, 168, 23, 0.8);
+}
+.ycm-map-marker.is-royal .ycm-marker-dot {
+  background: #e84118;
+  border-color: #ffd700;
+}
+.ycm-map-marker.is-water .ycm-marker-dot {
+  background: #00a8ff;
+  border-color: #f5f6fa;
+}
+.ycm-marker-label {
+  font-size: 11px;
+  color: #e6dfcc;
+  background: rgba(18, 20, 24, 0.85);
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+.ycm-map-marker.is-key .ycm-marker-label {
+  font-weight: 600;
+  color: #fced98;
+  border-color: rgba(212, 175, 55, 0.6);
+}
+.ycm-map-marker.non-key {
+  opacity: 0.85;
+}
+.ycm-map-world.zoom-low .ycm-map-marker.non-key .ycm-marker-label {
+  display: none;
+}
+.ycm-map-world.zoom-low .ycm-map-marker.non-key:hover .ycm-marker-label {
+  display: block;
+}
+
+/* 当前物理位置 Marker */
+.ycm-map-marker.is-current-pos {
+  z-index: 50 !important;
+  transform: translate(-50%, -50%) scale(1.25);
+}
+.ycm-map-marker.is-current-pos .ycm-marker-dot {
+  width: 14px;
+  height: 14px;
+  background: #e84118;
+  border: 2px solid #fff;
+  box-shadow: 0 0 12px #e84118;
+  animation: ycm-pulse 1.8s infinite;
+}
+.ycm-map-marker.is-current-pos .ycm-marker-label {
+  background: rgba(140, 45, 25, 0.92);
+  color: #ffffff;
+  border-color: #ffd700;
+  font-weight: 700;
+}
+@keyframes ycm-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(232, 65, 24, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(232, 65, 24, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 65, 24, 0); }
+}
+
+/* 地图工具栏 (Controls) */
+.ycm-map-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 60;
+}
+.ycm-map-ctrl-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(24, 28, 36, 0.92);
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 6px;
+  color: #f7eed7;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+.ycm-map-ctrl-btn:hover {
+  background: rgba(212, 175, 55, 0.25);
+  border-color: #f5d475;
+  color: #fff;
+}
+
+/* 视觉比例尺 */
+.ycm-map-scale {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(18, 20, 26, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: 4px 10px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  z-index: 60;
+  pointer-events: none;
+}
+
+/* ============================================================
+   永安城布局参考画布样式 (Part 3: 侧边抽屉/详情卡片)
+   ============================================================ */
+.ycm-side-drawer {
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(20, 24, 30, 0.9);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+.ycm-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding-bottom: 8px;
+}
+.ycm-drawer-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f5d475;
+}
+.ycm-drawer-search {
+  padding: 5px 8px;
+  background: rgba(10, 12, 16, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 11px;
+  outline: none;
+}
+.ycm-drawer-search:focus {
+  border-color: #f5d475;
+}
+.ycm-drawer-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-right: 4px;
+}
+.ycm-drawer-list::-webkit-scrollbar {
+  width: 4px;
+}
+.ycm-drawer-list::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 2px;
+}
+.ycm-drawer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ycm-drawer-item:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+  transform: translateX(2px);
+}
+.ycm-drawer-item.active {
+  background: rgba(184, 134, 11, 0.3);
+  border-color: #f5d475;
+}
+.ycm-drawer-item-name {
+  font-size: 12px;
+  color: #eae5d9;
+}
+.ycm-drawer-item-cat {
+  font-size: 10px;
+  color: #9ea4b0;
+}
+
+/* 地点详情卡片浮窗 */
+.ycm-detail-card {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 320px;
+  max-width: 85%;
+  background: linear-gradient(145deg, rgba(28, 32, 40, 0.96), rgba(18, 20, 26, 0.96));
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  padding: 14px 16px;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: ycm-fade-in 0.2s ease;
+}
+@keyframes ycm-fade-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ycm-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ycm-detail-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f5d475;
+}
+.ycm-detail-official {
+  font-size: 11px;
+  color: #baa47e;
+  margin-top: 2px;
+}
+.ycm-detail-close {
+  background: transparent;
+  border: none;
+  color: #8c92a0;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.ycm-detail-close:hover {
+  color: #ff6b6b;
+}
+.ycm-detail-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+}
+.ycm-detail-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #f0deab;
+}
+.ycm-detail-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #c5beaf;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px 10px;
+  border-radius: 4px;
+}
+.ycm-detail-subareas {
+  font-size: 11px;
+  color: #9c9484;
+}
+.ycm-detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+.ycm-btn-dest-disabled {
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #727885;
+  font-size: 11px;
+  cursor: not-allowed;
+}
+
+.ycm-scale-text {
+  font-size: 10px;
+  color: #c9a742;
+  font-weight: 600;
 }

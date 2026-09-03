@@ -8,6 +8,8 @@ import TravelEngine from './src/core/TravelEngine.js';
 import RouteEngine from './src/core/RouteEngine.js';
 import MapPanel from './src/ui/MapPanel.js';
 import MapDataLoader from './src/data/MapDataLoader.js';
+import YonganCityMapRenderer from './src/ui/YonganCityMapRenderer.js';
+
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -77,6 +79,9 @@ async function runTests() {
 
   const locsRef = await loader.loadCityLocations(worldRef, zhaoRef, yonganRef);
   assert.equal(locsRef.locations.length, 69);
+  assert.equal(locsRef.locations.length, locsRef.meta.total_locations);
+  assert.equal(new Set(locsRef.locations.map(loc => loc.id)).size, locsRef.locations.length);
+  assert.ok(locsRef.locations.every(loc => Number.isFinite(loc.x) && Number.isFinite(loc.y)));
   console.log('  永安城 69 个地点加载:', locsRef.locations.length === 69 && locsRef.hasDetail ? '✓' : '✗');
 
   // 3. 实例化 MapPanel
@@ -220,9 +225,179 @@ async function runTests() {
   console.log('  销毁无报错:', panel._visible === false ? '✓' : '✗');
   assert.equal(panel._visible, false);
 
+
+  console.log('\n【测试8】YonganCityMapRenderer 视口与坐标系统渲染');
+  const cityRef = yonganRef;
+  const locRef = locsRef;
+
+  const mockContainer = {
+    innerHTML: '',
+    appendChild() {},
+    querySelector() { return null; }
+  };
+
+  // 构造简易 mock DOM 环境支持 renderer 内部 createElement / appendChild
+  const renderer = new YonganCityMapRenderer({
+    container: mockContainer,
+    cityData: cityRef.cityData,
+    locations: locRef.locations,
+    currentLocationId: 'changle_xiang'
+  });
+
+  // 验证坐标映射
+  const changLeXiang = locRef.locations.find(l => l.id === 'changle_xiang');
+  const coords = renderer.locationToCanvasCoords(changLeXiang);
+  assert.ok(coords.x > 0 && coords.x < renderer.worldWidth, 'X坐标应处于实际画布内');
+  assert.ok(coords.y > 0 && coords.y < renderer.worldHeight, 'Y坐标应处于实际画布内');
+  assert.equal(renderer.scaleX, renderer.scaleY, '12×10布局单位应等比');
+  console.log('  长乐巷坐标映射正确:', coords, '✓');
+
+  // 西郊同样使用当前数据字段，不硬编码伪造坐标。
+  const westSuburbLoc = locRef.locations.find(l => l.district_id === 'west_suburb');
+  if (westSuburbLoc) {
+    const westCoords = renderer.locationToCanvasCoords(westSuburbLoc);
+    assert.equal(westCoords.x, Math.round(renderer.originX + westSuburbLoc.x * renderer.scaleX));
+    assert.equal(westCoords.y, Math.round(renderer.originY + (10 - westSuburbLoc.y) * renderer.scaleY));
+    console.log('  西郊使用数据驱动布局坐标: ✓');
+  }
+
+  const provenanceProbe = { ...changLeXiang, legacy_reference: { grid_x: -999, grid_y: -999 } };
+  assert.deepEqual(renderer.locationToCanvasCoords(provenanceProbe), coords, 'legacy_reference 不得覆盖当前布局字段');
+  assert.equal(renderer.locationToCanvasCoords({ id: 'missing-layout' }), null, '缺坐标时不得伪造 (0,0) 标记');
+
+  // 验证 8 大城区边界
+  assert.equal(Object.keys(renderer.districtBounds).length, 8);
+  assert.deepEqual(
+    cityRef.cityData.districts.map(d => [d.id, d.name]),
+    [
+      ['city_center', '城中心'], ['city_east', '城东'], ['city_south', '城南'], ['city_west', '城西'],
+      ['luoshui_north', '洛水北岸'], ['luoshui_south', '洛水南岸'], ['jinshui_junction', '金水合流角'], ['west_suburb', '城外西郊']
+    ]
+  );
+  console.log('  8 大主城区几何边界完整映射: ✓');
+
+  const background = renderer._generateBackgroundSvg();
+  ['北定门', '长乐门', '宣武门', '洛水大桥', '东渡渡口', '西渡渡口'].forEach(name => {
+    assert.ok(!background.includes(name), `不得渲染未在正式数据定名的 ${name}`);
+  });
+
+  const rendererSource = readFileSync(join(__dirname, 'src', 'ui', 'YonganCityMapRenderer.js'), 'utf8');
+  assert.ok(!rendererSource.includes('item.innerHTML ='), '索引动态数据不得直接写 innerHTML');
+  assert.ok(!rendererSource.includes('card.innerHTML ='), '详情动态数据不得直接写 innerHTML');
+  assert.ok(!rendererSource.includes('1 里'), '非精确测绘画布不得显示误导性固定比例尺');
+  const cssSource = readFileSync(join(__dirname, 'src', 'ui', 'MapPanel.css'), 'utf8');
+  assert.equal((cssSource.match(/{/g) || []).length, (cssSource.match(/}/g) || []).length, 'CSS 规则大括号必须平衡');
+
+  let resetCalled = false;
+  let bindCalled = false;
+  const initRenderer = new YonganCityMapRenderer({ container: mockContainer, cityData: cityRef.cityData, locations: [] });
+  initRenderer._renderDrawer = () => {};
+  initRenderer.resetView = () => { resetCalled = true; };
+  initRenderer._bindEvents = () => { bindCalled = true; };
+  initRenderer.init();
+  assert.ok(resetCalled && bindCalled, '真实 init() 必须初始化视角并绑定交互');
+
+  // 验证缩放与聚焦接口
+  renderer.focusLocation('changle_xiang');
+  assert.ok(renderer.zoom >= 1.4);
+  console.log('  聚焦地点缩放正常: ✓');
+
+  renderer.resetView();
+  assert.equal(renderer.zoom, 1.0);
+  console.log('  重置视图恢复 zoom=1.0: ✓');
+
+  renderer.destroy();
+  console.log('  CityMapRenderer 安全销毁: ✓');
+
+  console.log('\n【测试9】独立可拖拽浮动按钮生命周期与防误触');
+  let storageState = {};
+  global.localStorage = {
+    getItem(k) { return storageState[k] || null; },
+    setItem(k, v) { storageState[k] = String(v); },
+    removeItem(k) { delete storageState[k]; }
+  };
+
+  const floatPanel = new MapPanel(store, registry, travelEngine, null, loader);
+  let currentFloatBtn = null;
+  const floatDoc = {
+    getElementById(id) {
+      if (id === 'yongchu-map-floating-btn') return currentFloatBtn;
+      return null;
+    },
+    createElement(tag) {
+      const el = {
+        tag,
+        id: '',
+        className: '',
+        style: {},
+        innerHTML: '',
+        listeners: {},
+        setAttribute(k, v) { el[k] = v; },
+        classList: { add() {}, remove() {} },
+        addEventListener(evt, fn) { el.listeners[evt] = fn; },
+        removeEventListener(evt, fn) { delete el.listeners[evt]; },
+        remove() { currentFloatBtn = null; },
+        getBoundingClientRect() {
+          return { left: parseFloat(el.style.left) || 20, top: parseFloat(el.style.top) || 160, width: 88, height: 36 };
+        }
+      };
+      return el;
+    },
+    body: {
+      appendChild(node) {
+        if (node.id === 'yongchu-map-floating-btn') currentFloatBtn = node;
+      }
+    },
+    querySelector() { return null; }
+  };
+
+  global.window.innerWidth = 300;
+  global.window.innerHeight = 200;
+  storageState.yongchu_map_btn_pos_v1 = JSON.stringify({ left: 9999, top: 9999 });
+
+  floatPanel._getDoc = () => floatDoc;
+
+  // 确保生成浮动按钮
+  floatPanel._ensureFloatingButton();
+  const floatBtn = floatDoc.getElementById('yongchu-map-floating-btn');
+  assert.ok(floatBtn, '浮动按钮已创建并挂载');
+  assert.ok(parseFloat(floatBtn.style.left) <= 212 && parseFloat(floatBtn.style.top) <= 156, '恢复的位置必须被夹在当前视口内');
+  floatPanel._ensureFloatingButton();
+  assert.equal(floatDoc.getElementById('yongchu-map-floating-btn'), floatBtn, '重复 ensure 不得创建第二个浮动按钮');
+  console.log('  浮动按钮挂载成功: ✓');
+
+  // 模拟点击 (未移动)
+  let toggleCalled = false;
+  floatPanel.toggle = () => { toggleCalled = true; };
+  floatBtn.listeners['pointerdown']({ clientX: 100, clientY: 100, stopPropagation() {} });
+  floatBtn.listeners['pointerup']({ clientX: 100, clientY: 100 });
+  assert.ok(toggleCalled, '原地轻点应触发 toggle() 开启/关闭面板');
+  console.log('  原地点击正确触发面板切换: ✓');
+
+  toggleCalled = false;
+  floatBtn.listeners['pointerdown']({ clientX: 100, clientY: 100, stopPropagation() {} });
+  floatBtn.listeners['pointercancel']({});
+  assert.equal(toggleCalled, false, 'pointercancel 不得误触发点击');
+
+  floatBtn.listeners.keydown({ key: 'Enter', preventDefault() {} });
+  assert.equal(toggleCalled, true, '键盘 Enter 应能打开浮动按钮');
+
+  // 模拟拖拽移动超过阈值并持久化
+  toggleCalled = false;
+  floatBtn.listeners['pointerdown']({ clientX: 100, clientY: 100, stopPropagation() {} });
+  floatBtn.listeners['pointermove']({ clientX: 160, clientY: 220 });
+  floatBtn.listeners['pointerup']({ clientX: 160, clientY: 220 });
+  assert.equal(toggleCalled, false, '拖动后 pointerup 不应触发 toggle');
+  assert.ok(storageState['yongchu_map_btn_pos_v1'], '拖拽后位置已持久化');
+  console.log('  拖拽与点击防误触区分且位置持久化成功: ✓');
+
+  floatPanel.destroy();
+  assert.equal(floatDoc.getElementById('yongchu-map-floating-btn'), null);
+  console.log('  面板销毁时浮动按钮一并安全清理: ✓');
+
   if (failedChecks > 0) throw new Error(`${failedChecks} 项 UI 检查失败`);
   console.log('\n========== UI 与 Data 联动测试总结 ==========');
-  console.log('所有 7 项测试及关键断言全部通过！');
+  console.log('所有 9 项测试及关键断言全部通过！');
   console.log('============================================');
 }
 

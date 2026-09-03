@@ -5,8 +5,13 @@
 // ============================================================
 
 import MapDataLoader from '../data/MapDataLoader.js';
+import YonganCityMapRenderer from './YonganCityMapRenderer.js';
+
 
 const UI_BTN_ID = 'yongchu-map-toggle-btn';
+const UI_FLOAT_BTN_ID = 'yongchu-map-floating-btn';
+const STORAGE_BTN_POS_KEY = 'yongchu_map_btn_pos_v1';
+
 const UI_MODAL_ID = 'yongchu-map-modal';
 const UI_STYLE_ID = 'yongchu-map-styles';
 
@@ -20,6 +25,10 @@ export default class MapPanel {
 
     this._panelElement = null;
     this._btnElement = null;
+    this._floatingBtnElement = null;
+    this._cityMapRenderer = null;
+    this._floatDragCleanup = null;
+
     this._styleElement = null;
     this._visible = false;
     this._chatChangedHandler = null;
@@ -63,6 +72,7 @@ export default class MapPanel {
     }
     this._injectStyles();
     this._ensureButton();
+    this._ensureFloatingButton();
     this._ensurePanel();
     this._bindHostEvents();
     console.log('[YongchuMap] MapPanel UI v1 骨架初始化完成');
@@ -96,7 +106,7 @@ export default class MapPanel {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      this.toggle();
+      this._toggleFromUi();
     });
 
     const wandTarget = doc.querySelector('#extensionsMenu') || doc.querySelector('.extensionsMenu');
@@ -113,6 +123,190 @@ export default class MapPanel {
       doc.body.appendChild(btn);
     }
     this._btnElement = btn;
+  }
+
+  _ensureFloatingButton() {
+    const doc = this._getDoc();
+    if (!doc) return;
+
+    if (doc.getElementById(UI_FLOAT_BTN_ID)) {
+      this._floatingBtnElement = doc.getElementById(UI_FLOAT_BTN_ID);
+      return;
+    }
+
+    const btn = doc.createElement('div');
+    btn.id = UI_FLOAT_BTN_ID;
+    btn.className = 'ycm-floating-btn';
+    btn.setAttribute('role', 'button');
+    btn.setAttribute('tabindex', '0');
+    btn.setAttribute('title', '打开永初地舆图 (可自由拖拽)');
+    btn.innerHTML = '<span class="ycm-floating-icon">🗺️</span><span class="ycm-floating-text">地舆图</span>';
+
+    // 读取持久化保存的位置 (从 localStorage)
+    let savedPos = null;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const raw = localStorage.getItem(STORAGE_BTN_POS_KEY);
+        if (raw) savedPos = JSON.parse(raw);
+      }
+    } catch (_) {}
+
+    const defaultRight = 20;
+    const defaultBottom = 160;
+
+    if (savedPos && typeof savedPos.left === 'number' && typeof savedPos.top === 'number') {
+      btn.style.left = `${savedPos.left}px`;
+      btn.style.top = `${savedPos.top}px`;
+      btn.style.right = 'auto';
+      btn.style.bottom = 'auto';
+    } else {
+      btn.style.right = `${defaultRight}px`;
+      btn.style.bottom = `${defaultBottom}px`;
+    }
+
+    doc.body.appendChild(btn);
+    this._floatingBtnElement = btn;
+    if (savedPos) this._clampFloatingButtonPosition(btn);
+
+    // 绑定拖拽与点击防误判逻辑
+    this._bindFloatingButtonEvents(btn);
+  }
+
+  _bindFloatingButtonEvents(btn) {
+    let isDragging = false;
+    let dragMoved = false;
+    let startPointerX = 0;
+    let startPointerY = 0;
+    let initialLeft = 0;
+    let initialTop = 0;
+
+    const onPointerDown = (e) => {
+      e.stopPropagation();
+      isDragging = true;
+      dragMoved = false;
+      startPointerX = e.clientX;
+      startPointerY = e.clientY;
+
+      const rect = btn.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      // 切换为 left/top 定位
+      btn.style.left = `${initialLeft}px`;
+      btn.style.top = `${initialTop}px`;
+      btn.style.right = 'auto';
+      btn.style.bottom = 'auto';
+
+      if (typeof btn.setPointerCapture === 'function') {
+        try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+    };
+
+    const onPointerMove = (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - startPointerX;
+      const dy = e.clientY - startPointerY;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+        dragMoved = true;
+      }
+
+      let curLeft = initialLeft + dx;
+      let curTop = initialTop + dy;
+
+      // 边界限制，防止拖出屏幕可视区域
+      const view = btn.ownerDocument?.defaultView || (typeof window !== 'undefined' ? window : null);
+      const winW = view?.innerWidth || 1200;
+      const winH = view?.innerHeight || 800;
+      const btnW = btn.offsetWidth || 80;
+      const btnH = btn.offsetHeight || 36;
+
+      curLeft = Math.max(8, Math.min(winW - btnW - 8, curLeft));
+      curTop = Math.max(8, Math.min(winH - btnH - 8, curTop));
+
+      btn.style.left = `${curLeft}px`;
+      btn.style.top = `${curTop}px`;
+    };
+
+    const onPointerUp = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      if (typeof btn.releasePointerCapture === 'function') {
+        try { btn.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
+
+      if (dragMoved) {
+        // 保存新位置至 localStorage
+        try {
+          if (typeof localStorage !== 'undefined') {
+            const rect = btn.getBoundingClientRect();
+            localStorage.setItem(STORAGE_BTN_POS_KEY, JSON.stringify({
+              left: Math.round(rect.left),
+              top: Math.round(rect.top)
+            }));
+          }
+        } catch (_) {}
+      } else {
+        // 未显著移动，判定为点击
+        this._toggleFromUi();
+      }
+    };
+
+    const onPointerCancel = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      if (typeof btn.releasePointerCapture === 'function') {
+        try { btn.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
+    };
+
+    const onKeyDown = (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      this._toggleFromUi();
+    };
+
+    const view = btn.ownerDocument?.defaultView || (typeof window !== 'undefined' ? window : null);
+    const onResize = () => this._clampFloatingButtonPosition(btn);
+
+    btn.addEventListener('pointerdown', onPointerDown);
+    btn.addEventListener('pointermove', onPointerMove);
+    btn.addEventListener('pointerup', onPointerUp);
+    btn.addEventListener('pointercancel', onPointerCancel);
+    btn.addEventListener('keydown', onKeyDown);
+    if (view?.addEventListener) view.addEventListener('resize', onResize);
+
+    this._floatDragCleanup = () => {
+      btn.removeEventListener('pointerdown', onPointerDown);
+      btn.removeEventListener('pointermove', onPointerMove);
+      btn.removeEventListener('pointerup', onPointerUp);
+      btn.removeEventListener('pointercancel', onPointerCancel);
+      btn.removeEventListener('keydown', onKeyDown);
+      if (view?.removeEventListener) view.removeEventListener('resize', onResize);
+    };
+  }
+
+  _clampFloatingButtonPosition(btn) {
+    if (!btn || !btn.style || !btn.style.left) return;
+    const view = btn.ownerDocument?.defaultView || (typeof window !== 'undefined' ? window : null);
+    const winW = view?.innerWidth || 1200;
+    const winH = view?.innerHeight || 800;
+    const btnW = btn.offsetWidth || btn.getBoundingClientRect?.().width || 80;
+    const btnH = btn.offsetHeight || btn.getBoundingClientRect?.().height || 36;
+    const left = Number.parseFloat(btn.style.left);
+    const top = Number.parseFloat(btn.style.top);
+    btn.style.left = `${Math.max(8, Math.min(Math.max(8, winW - btnW - 8), Number.isFinite(left) ? left : 8))}px`;
+    btn.style.top = `${Math.max(8, Math.min(Math.max(8, winH - btnH - 8), Number.isFinite(top) ? top : 8))}px`;
+  }
+
+  _toggleFromUi() {
+    try {
+      const result = this.toggle();
+      if (result && typeof result.catch === 'function') {
+        result.catch(err => console.error('[YongchuMap] 打开地图失败:', err));
+      }
+    } catch (err) {
+      console.error('[YongchuMap] 打开地图失败:', err);
+    }
   }
 
   _ensurePanel() {
@@ -166,7 +360,16 @@ export default class MapPanel {
       if (self._reensureTimer) clearTimeout(self._reensureTimer);
       self._reensureTimer = setTimeout(() => {
         self._reensureTimer = null;
-        if (!self._destroyed) self._ensureButton();
+        if (!self._destroyed) {
+          self._ensureButton();
+          self._ensureFloatingButton();
+          self._ensurePanel();
+          if (self._visible) {
+            self._syncNavWithCurrentState()
+              .then(() => self.render())
+              .catch(err => console.error('[YongchuMap] 切换聊天后刷新地图失败:', err));
+          }
+        }
       }, 250);
     };
 
@@ -234,8 +437,10 @@ export default class MapPanel {
   }
 
   async show() {
+    if (this._destroyed) return { success: false, error: '已销毁' };
     this._ensurePanel();
     this._ensureButton();
+    this._ensureFloatingButton();
     this._visible = true;
 
     if (this._panelElement) {
@@ -243,6 +448,7 @@ export default class MapPanel {
     }
 
     await this._syncNavWithCurrentState();
+    if (this._destroyed) return { success: false, error: '已销毁' };
     return await this.render();
   }
 
@@ -339,6 +545,7 @@ export default class MapPanel {
   }
 
   async render() {
+    if (this._destroyed) return { success: false, error: '已销毁' };
     // 即使在无 DOM 或面板未挂载时，也先确保数据加载完成（方便无头测试与后台预加载）
     const generation = ++this._renderGeneration;
     const nav = { ...this.navState };
@@ -590,6 +797,10 @@ export default class MapPanel {
     const cityName = cityRef?.cityMeta?.name || '本城';
 
     if (!cityRef || !cityRef.hasDetail) {
+      if (this._cityMapRenderer) {
+        this._cityMapRenderer.destroy();
+        this._cityMapRenderer = null;
+      }
       container.innerHTML = `
         ${bannerHtml}
         <div class="ycm-empty-fallback">
@@ -605,70 +816,33 @@ export default class MapPanel {
     const cityData = cityRef.cityData;
     const worldId = this.navState.worldId;
     const locations = this.registry ? this.registry.getCityLocations(worldId, this.navState.cityId) : (this._cityLocationsRef?.locations || []);
-    const totalCount = locations.length;
 
     const state = this.store ? this.store.getState() : null;
-    const currentLocationId = state?.physical_state?.location_id || null;
-
-    const categories = {};
-    locations.forEach(l => {
-      categories[l.category] = (categories[l.category] || 0) + 1;
-    });
-
-    let pillsHtml = '';
-    locations.forEach(l => {
-      const isCurrent = l.id === currentLocationId;
-      const currentBadge = isCurrent ? ' (当前)' : '';
-      pillsHtml += `
-        <div class="ycm-loc-pill ${isCurrent ? 'is-current' : ''}" title="${this._escapeHtml(l.atmosphere || l.name)}">
-          <span>${isCurrent ? '📍 ' : ''}${this._escapeHtml(l.name)}${currentBadge}</span>
-          <span class="ycm-loc-category">[${this._escapeHtml(l.category)}]</span>
-        </div>
-      `;
-    });
-
-    const districtsCount = cityData?.districts ? cityData.districts.length : 0;
-    const cityDesc = cityData?.meta?.description || '暂无城市简介';
+    const phys = state ? state.physical_state : {};
+    // 只有当当前物理位置有效，且确实属于当前城市时才传入 location_id
+    const currentLocationId = (phys.city_id === this.navState.cityId && phys.location_id) ? phys.location_id : null;
 
     container.innerHTML = `
       ${bannerHtml}
-      <div class="ycm-city-panel">
-        <div class="ycm-city-banner">
-          <div>
-            <div style="font-size:18px; font-weight:700; color:#f5d475; margin-bottom:4px;">
-              ${this._escapeHtml(cityName)}城全域风貌
-            </div>
-            <div style="font-size:12px; color:#a2a7b3;">
-              ${districtsCount > 0 ? districtsCount + '大主城区域 · ' : ''}${this._escapeHtml(cityDesc)}
-            </div>
-          </div>
-          <div class="ycm-city-stats">
-            <div class="ycm-stat-item">
-              <span class="ycm-stat-value">${totalCount}</span>
-              <span class="ycm-stat-label">已加载地点</span>
-            </div>
-            <div class="ycm-stat-item">
-              <span class="ycm-stat-value">${Object.keys(categories).length}</span>
-              <span class="ycm-stat-label">风貌门类</span>
-            </div>
-            <div class="ycm-stat-item">
-              <span class="ycm-stat-value">${districtsCount}</span>
-              <span class="ycm-stat-label">区域坊市</span>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:13px; color:#d4af37; font-weight:600;">地点索引列表（已全量接通 LocationRegistry 数据源）</span>
-            <span style="font-size:11px; color:#858c99;">共 ${totalCount} 处</span>
-          </div>
-          <div class="ycm-locations-flow">
-            ${pillsHtml}
-          </div>
-        </div>
-      </div>
+      <div id="ycm-city-map-mount" style="height: calc(100% - 60px); min-height: 480px;"></div>
     `;
+
+    const mountPoint = container.querySelector('#ycm-city-map-mount');
+    if (mountPoint) {
+      if (this._cityMapRenderer) {
+        this._cityMapRenderer.destroy();
+      }
+      this._cityMapRenderer = new YonganCityMapRenderer({
+        container: mountPoint,
+        cityData: cityData,
+        locations: locations,
+        currentLocationId: currentLocationId,
+        onLocationClick: (loc) => {
+          console.log('[YongchuMap] 点击城市地点:', loc.name);
+        }
+      });
+      this._cityMapRenderer.init();
+    }
   }
 
   refreshLocationMarker() {
@@ -691,6 +865,18 @@ export default class MapPanel {
     this._destroyed = true;
     this._renderGeneration++;
     this._unbindHostEvents();
+    if (this._floatDragCleanup) {
+      try { this._floatDragCleanup(); } catch (_) {}
+      this._floatDragCleanup = null;
+    }
+    if (this._cityMapRenderer) {
+      try { this._cityMapRenderer.destroy(); } catch (_) {}
+      this._cityMapRenderer = null;
+    }
+    if (this._floatingBtnElement) {
+      try { this._floatingBtnElement.remove(); } catch (_) {}
+      this._floatingBtnElement = null;
+    }
     if (this._btnElement) {
       try { this._btnElement.remove(); } catch (_) {}
       this._btnElement = null;
