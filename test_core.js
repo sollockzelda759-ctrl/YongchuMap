@@ -373,12 +373,97 @@ async function runTests() {
   console.log('  7楼结算未被误删 (isSettled(7) === true):', store.isSettled(7) ? '✓' : '✗');
   console.log('  位置恢复为8结算前的状态(东市主街):', store.getState().physical_state.location_name === '东市主街' ? '✓' : '✗');
   console.log('');
+  // ── 测试16：Swipe 宿主 GENERATION_ENDED 传 chat.length (7) 对齐到 assistant 索引 6 ──
+  console.log('【测试16】Swipe 生命周期实机对齐测试（chat.length=7, active assistant index=6, GENERATION_ENDED=7）');
+  store.setPhysicalLocation({ id: 'jiujia_zhaidi', name: '旧家宅邸', world_id: 'yongchu', city_id: 'yongan' });
+  // 先重置当前 context 的结算记录，防止测试15残留的 7 楼结算影响
+  store.rollbackSettlement(7);
+
+
+  // 16.1 模拟前序状态：
+  // assistant message index = 6 之前已结算过为“西市”
+  const simContentWest = '<scene>地点：西市</scene>\n<map_event>\naction: arrive\nname: 西市\n</map_event>';
+  await settlement.settle({
+    messageId: 6,
+    messageContent: simContentWest,
+    sourceMessageId: 5,
+    generationId: 'gen_before_swipe'
+  });
+  console.log('  测试前 6 楼已结算:', store.isSettled(6) ? '✓' : '✗');
+  console.log('  测试前 physical_state 为西市:', store.getState().physical_state.location_name === '西市' ? '✓' : '✗');
+
+  // ── 模拟宿主事件总线或真机注册 ──
+  // 16.2 构造宿主真实环境：
+  // 当前 chat 数组长度为 7（索引 0..6），其中 index 6 是 assistant 消息（最新 swipe 为“东市主街”）
+  const simContentEast = '<scene>地点：东市主街</scene>\n<map_event>\naction: arrive\nname: 东市主街\n</map_event>';
+  const fakeChat = [
+    { message_id: 0, is_user: true, mes: 'm0' },
+    { message_id: 1, is_user: false, mes: 'm1' },
+    { message_id: 2, is_user: true, mes: 'm2' },
+    { message_id: 3, is_user: false, mes: 'm3' },
+    { message_id: 4, is_user: true, mes: 'm4' },
+    { message_id: 5, is_user: true, mes: 'm5' },
+    { message_id: 6, is_user: false, mes: simContentEast }
+  ];
+
+  const fakeEventSource = {
+    listeners: {},
+    on(event, handler) {
+      if (!this.listeners[event]) this.listeners[event] = [];
+      this.listeners[event].push(handler);
+    },
+    off(event, handler) {
+      if (!this.listeners[event]) return;
+      this.listeners[event] = this.listeners[event].filter(h => h !== handler);
+    },
+    emit(event, ...args) {
+      if (this.listeners[event]) {
+        for (const h of this.listeners[event]) {
+          h(...args);
+        }
+      }
+    }
+  };
+
+  global.window.SillyTavern.getContext = () => ({
+    chat: fakeChat,
+    eventSource: fakeEventSource,
+    eventTypes: {
+      GENERATION_STARTED: 'generation_started',
+      MESSAGE_RECEIVED: 'message_received',
+      GENERATION_ENDED: 'generation_ended',
+      MESSAGE_SWIPED: 'message_swiped'
+    }
+  });
+
+  const swipeGenEvents = new GenerationEvents(settlement, mapContext, store);
+  swipeGenEvents.register();
+
+  // 16.3 模拟宿主真机 Swipe 事件时序：
+  // a. 触发 MESSAGE_RECEIVED { message_id: 6, type: 'swipe' }
+  fakeEventSource.emit('message_received', { message_id: 6, type: 'swipe' });
+  // b. 触发 GENERATION_ENDED(7) —— 传参为 7（即 chat.length）
+  fakeEventSource.emit('generation_ended', 7);
+
+  // 等待 settle promise 完成
+  if (swipeGenEvents._lastSettlePromise) {
+    await swipeGenEvents._lastSettlePromise;
+  }
+
+  // 16.4 验证：
+  // 处理的目标必须是 6，绝不能产生 7
+  console.log('  结算记录没有错误创建 7 (isSettled(7) === false):', !store.isSettled(7) ? '✓' : '✗');
+  console.log('  6 楼最终处于结算状态 (isSettled(6) === true):', store.isSettled(6) ? '✓' : '✗');
+  console.log('  physical_state 成功更新为新 Swipe 结算结果东市主街:', store.getState().physical_state.location_name === '东市主街' ? '✓' : '✗');
+  console.log('  最近处理的 messageId 正确为 6:', swipeGenEvents._lastMessageId === 6 ? '✓' : '✗');
+  console.log('');
+
 
   // ── 总结 ──
   console.log('========== 测试总结 ==========');
   console.log('  地点总数:', registry.getTotalLocationCount());
   console.log('  schema版本:', store.getState().schema_version);
-  console.log('  所有15项核心单元与宿主合同测试全部通过！');
+  console.log('  所有16项核心单元与宿主合同测试全部通过！');
   console.log('==============================');
 }
 

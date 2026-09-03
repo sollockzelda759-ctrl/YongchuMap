@@ -20,6 +20,9 @@ export default class GenerationEvents {
     this._lastMessageId = null;
     this._currentGenerationId = null;
     this._generationStopped = false;
+    this._lastReceivedMessage = null; // 记录最近的 MESSAGE_RECEIVED (含 messageId, type)
+    this._lastSwipedMessage = null;   // 记录最近的 MESSAGE_SWIPED
+    this._lastSettlePromise = null;   // 最近一次 settle 的 promise，便于测试和链式对账
     this._eventSource = null;
     this._eventTypes = null;
   }
@@ -59,10 +62,23 @@ export default class GenerationEvents {
       });
     }
 
-    // ── GENERATION_ENDED：后置结算主入口，参数按messageId数字处理 ──
+    // ── MESSAGE_RECEIVED：记录最新接收到的 AI 消息与类型（用于校准 GENERATION_ENDED 的 messageId） ──
+    if (ET.MESSAGE_RECEIVED) {
+      this._addListener(ET.MESSAGE_RECEIVED, function(messageId, type) {
+        const resolvedId = self._resolveMessageId(messageId);
+        self._lastReceivedMessage = {
+          messageId: resolvedId,
+          type: (type !== undefined && type !== null) ? (typeof type === 'object' ? type.type || 'swipe' : type) : null,
+          timestamp: Date.now()
+        };
+        console.log('[YongchuMap] MESSAGE_RECEIVED: messageId=' + resolvedId + ', type=' + self._lastReceivedMessage.type);
+      });
+    }
+
+    // ── GENERATION_ENDED：后置结算主入口 ──
     if (ET.GENERATION_ENDED) {
-      this._addListener(ET.GENERATION_ENDED, function(messageId) {
-        console.log('[YongchuMap] GENERATION_ENDED, messageId=' + messageId + ', seq=' + self._msgSeq);
+      this._addListener(ET.GENERATION_ENDED, function(rawMessageParam) {
+        console.log('[YongchuMap] GENERATION_ENDED 触发, rawParam=' + rawMessageParam + ', seq=' + self._msgSeq);
 
         if (self._generationStopped) {
           console.log('[YongchuMap] 当前生成轮次已被停止/取消，跳过结算');
@@ -71,10 +87,10 @@ export default class GenerationEvents {
           return;
         }
 
-        // 参数就是messageId（数字）
-        const resolvedMessageId = self._resolveMessageId(messageId);
+        // 结合 host chat、active assistant 消息及 MESSAGE_RECEIVED 动态校准真实 target messageId
+        const resolvedMessageId = self._resolveTargetAssistantMessageId(rawMessageParam);
         if (resolvedMessageId === null || resolvedMessageId === undefined) {
-          console.warn('[YongchuMap] GENERATION_ENDED无法解析messageId');
+          console.warn('[YongchuMap] GENERATION_ENDED无法解析有效messageId, 放弃结算');
           self._generationStopped = false;
           self._currentGenerationId = null;
           return;
@@ -85,7 +101,7 @@ export default class GenerationEvents {
         self._currentGenerationId = null;
         self._generationStopped = false;
 
-        self.settlement.settle({
+        self._lastSettlePromise = self.settlement.settle({
           messageId: resolvedMessageId,
           sourceMessageId: sourceMessageId,
           generationId: genId,
@@ -104,6 +120,7 @@ export default class GenerationEvents {
               has_before_snapshot: result.has_before_snapshot
             }));
           }
+          return result;
         }).catch(function(e) {
           console.error('[YongchuMap] 结算异常:', e.message);
         });
@@ -141,12 +158,16 @@ export default class GenerationEvents {
       });
     }
 
-    // ── MESSAGE_SWIPED：Swipe时回滚旧版本，重新结算当前版本 ──
+    // ── MESSAGE_SWIPED：Swipe时记录并触发Swipe处理 ──
     if (ET.MESSAGE_SWIPED) {
       this._addListener(ET.MESSAGE_SWIPED, function(data) {
         console.log('[YongchuMap] MESSAGE_SWIPED, data=' + JSON.stringify(data));
         const messageId = self._resolveMessageId(data);
         if (messageId !== null && messageId !== undefined) {
+          self._lastSwipedMessage = {
+            messageId: messageId,
+            timestamp: Date.now()
+          };
           const sourceMessageId = self._getSourceMessageId();
           self.settlement.onSwipeChanged(messageId, messageId, sourceMessageId);
         }
@@ -176,8 +197,9 @@ export default class GenerationEvents {
     console.log('[YongchuMap] 事件注册完成: ' +
       [ET.GENERATION_STARTED && 'STARTED', ET.GENERATION_ENDED && 'ENDED',
        ET.GENERATION_STOPPED && 'STOPPED', ET.GENERATION_ERROR && 'ERROR',
-       ET.CHAT_CHANGED && 'CHAT_CHANGED', ET.MESSAGE_SWIPED && 'SWIPED',
-       ET.MESSAGE_DELETED && 'DELETED', ET.CHARACTER_CHANGED && 'CHAR_CHANGED']
+       ET.CHAT_CHANGED && 'CHAT_CHANGED', ET.MESSAGE_RECEIVED && 'RECEIVED',
+       ET.MESSAGE_SWIPED && 'SWIPED', ET.MESSAGE_DELETED && 'DELETED',
+       ET.CHARACTER_CHANGED && 'CHAR_CHANGED']
       .filter(Boolean).join(', '));
     return true;
   }
@@ -202,6 +224,72 @@ export default class GenerationEvents {
       if (param.id !== undefined && param.id !== null) return this._resolveMessageId(param.id);
     }
     return param !== undefined && param !== null ? param : null;
+  }
+
+  // ── 解析并校准目标 Assistant messageId ──
+  // 在 Swipe 场景下，TauriTavern/SillyTavern 的 GENERATION_ENDED 传参经常是剩余总长度 chat.length 或其它数字（例如7），
+  // 但真实 Swipe 的 assistant message 索引是 6，MESSAGE_RECEIVED 事件也明确是 6。
+  // 本方法结合真实 host chat 数组、active assistant message 和 MESSAGE_RECEIVED 进行对齐。
+  _resolveTargetAssistantMessageId(rawParam) {
+    const rawId = this._resolveMessageId(rawParam);
+    const ctx = this._getContext();
+    const chat = (ctx && Array.isArray(ctx.chat)) ? ctx.chat : null;
+
+    // 1. 如果有近期记录的 MESSAGE_RECEIVED (尤其是 swipe 类型或在当前生成轮次收到的)，且在 chat 范围内或为合法ID，优先采纳
+    if (this._lastReceivedMessage && this._lastReceivedMessage.messageId !== null && this._lastReceivedMessage.messageId !== undefined) {
+      const recId = this._lastReceivedMessage.messageId;
+      // 如果 chat 可用，核验 recId 是否为非用户消息
+      if (chat && chat.length > 0) {
+        if (typeof recId === 'number' && recId >= 0 && recId < chat.length && chat[recId] && !chat[recId].is_user) {
+          return recId;
+        }
+        const found = chat.find((m, idx) => (m && (m.message_id === recId || m.id === recId || idx === recId) && !m.is_user));
+        if (found) {
+          return (found.message_id !== undefined && found.message_id !== null) ? found.message_id : recId;
+        }
+      } else {
+        return recId;
+      }
+    }
+
+    // 2. 如果发生了 MESSAGE_SWIPED，优先对准 swiped 消息
+    if (this._lastSwipedMessage && this._lastSwipedMessage.messageId !== null && this._lastSwipedMessage.messageId !== undefined) {
+      const swipedId = this._lastSwipedMessage.messageId;
+      if (chat && chat.length > 0) {
+        if (typeof swipedId === 'number' && swipedId >= 0 && swipedId < chat.length && chat[swipedId] && !chat[swipedId].is_user) {
+          return swipedId;
+        }
+      } else {
+        return swipedId;
+      }
+    }
+
+    // 3. 如果能访问 host chat，检查 rawId 在 chat 里的情况
+    if (chat && chat.length > 0) {
+      // 3.1 若 rawId 正好是当前消息索引且该消息为 assistant (非 user)，直接匹配
+      if (typeof rawId === 'number' && rawId >= 0 && rawId < chat.length && chat[rawId] && !chat[rawId].is_user) {
+        return (chat[rawId].message_id !== undefined && chat[rawId].message_id !== null) ? chat[rawId].message_id : rawId;
+      }
+
+      // 3.2 若 rawId 等于 chat.length 或超出有效索引边界，说明 host 传入的是 length 或下一个空位索引
+      // 此时目标 assistant 必然是当前聊天中最后一条活跃的 assistant 消息
+      for (let i = chat.length - 1; i >= 0; i--) {
+        const item = chat[i];
+        if (item && item.is_user !== true) {
+          return (item.message_id !== undefined && item.message_id !== null) ? item.message_id : i;
+        }
+      }
+
+      // 3.3 如果 rawId 指向的是 user 消息，而紧接着或倒序存在 assistant 消息，寻找最近的 assistant 消息
+      for (let i = chat.length - 1; i >= 0; i--) {
+        if (chat[i] && !chat[i].is_user) {
+          return (chat[i].message_id !== undefined && chat[i].message_id !== null) ? chat[i].message_id : i;
+        }
+      }
+    }
+
+    // 4. 后备：无 chat 上下文时返回 rawId
+    return rawId;
   }
 
   // ── 获取sourceMessageId（最新用户消息） ──
