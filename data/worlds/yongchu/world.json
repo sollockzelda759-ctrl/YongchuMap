@@ -2,6 +2,7 @@
   "schema_version": "1.0.0",
   "id": "yongchu",
   "name": "永初大陆",
+  "art_asset": "../../../assets/maps/yongchu/world.png",
   "historical_background": {
     "era": "六国成型期 (距今约一百五十年)",
     "preceding_dynasty": "大一统大胤朝 (距今约五百年至三百五十年，定都中州)",
@@ -44,6 +45,7 @@
       "population": 11400000,
       "populationRatio": "22%",
       "geographicPosition": "大陆中部偏南",
+      "visualCoord": { "x": 51, "y": 49, "width": 34, "height": 31 },
       "territoryDimensions": {
         "eastWestLi": 800,
         "northSouthLi": 700
@@ -53,7 +55,15 @@
         "standingArmy": 150000,
         "coreForces": "北境军镇五万精兵（驻青壁城，分东西两段防线）；澜江水军五十余艘战船"
       },
-      "nationalDataFile": "./nations/zhaoguo.national.json"
+      "nationalDataFile": "./nations/zhaoguo.national.json",
+      "keyCities": [
+        {
+          "id": "yongan",
+          "name": "永安",
+          "type": "都城",
+          "population": 850000
+        }
+      ]
     },
     {
       "id": "yan",
@@ -64,6 +74,7 @@
       "population": 10900000,
       "populationRatio": "21%",
       "geographicPosition": "大陆北方",
+      "visualCoord": { "x": 50, "y": 20, "width": 35, "height": 27 },
       "territoryDimensions": {
         "eastWestLi": 1000,
         "northSouthLi": 800
@@ -73,6 +84,7 @@
         "standingArmy": 250000,
         "coreForces": "铁骑八万，草原可动员三至五万骑兵，南部驻军六万对峙昭国"
       },
+      "nationalDataFile": "./nations/yan.national.json",
       "keyCities": [
         {
           "id": "fengtian",
@@ -121,6 +133,7 @@
       "population": 5700000,
       "populationRatio": "11%",
       "geographicPosition": "大陆东北",
+      "visualCoord": { "x": 79, "y": 35, "width": 29, "height": 37 },
       "territoryDimensions": {
         "eastWestLi": 600,
         "northSouthLi": 700
@@ -130,6 +143,7 @@
         "standingArmy": 120000,
         "coreForces": "重甲步兵，山地防守强，工匠造大型攻城器械，平原野战弱"
       },
+      "nationalDataFile": "./nations/zhao.national.json",
       "keyCities": [
         {
           "id": "tieling",
@@ -178,6 +192,7 @@
       "population": 12500000,
       "populationRatio": "24%",
       "geographicPosition": "大陆南方",
+      "visualCoord": { "x": 38, "y": 76, "width": 35, "height": 31 },
       "territoryDimensions": {
         "eastWestLi": 900,
         "northSouthLi": 800
@@ -187,6 +202,7 @@
         "standingArmy": 180000,
         "coreForces": "山地兵与大泽水军，南方宗族兵听族长不听朝廷"
       },
+      "nationalDataFile": "./nations/chu.national.json",
       "keyCities": [
         {
           "id": "yunmeng",
@@ -235,6 +251,7 @@
       "population": 5000000,
       "populationRatio": "10%",
       "geographicPosition": "大陆西部",
+      "visualCoord": { "x": 18, "y": 49, "width": 28, "height": 35 },
       "territoryDimensions": {
         "eastWestLi": 500,
         "northSouthLi": 600
@@ -244,6 +261,7 @@
         "standingArmy": 80000,
         "coreForces": "商路精锐护军三万，战时雇佣西域雇佣兵"
       },
+      "nationalDataFile": "./nations/liang.national.json",
       "keyCities": [
         {
           "id": "jincheng",
@@ -292,6 +310,7 @@
       "population": 6500000,
       "populationRatio": "12%",
       "geographicPosition": "大陆东南沿海",
+      "visualCoord": { "x": 73, "y": 77, "width": 34, "height": 31 },
       "territoryDimensions": {
         "northSouthCoastLi": 700,
         "inlandDepthLi": 400
@@ -301,6 +320,7 @@
         "standingArmy": 100000,
         "coreForces": "水师战船三百余艘，控制近海与澜江入海口，陆战偏弱"
       },
+      "nationalDataFile": "./nations/chen.national.json",
       "keyCities": [
         {
           "id": "haimen",

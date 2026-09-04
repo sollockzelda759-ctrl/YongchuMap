@@ -1253,7 +1253,7 @@
   left: 0;
   top: 0;
   width: 1200px;
-  height: 800px;
+  height: 900px;
   overflow: hidden;
   transform-origin: 0 0;
   background: #081521;
@@ -1397,6 +1397,19 @@
   font-weight: 800;
   letter-spacing: 1px;
 }
+.ycm-strategic-search {
+  width: 100%;
+  margin-top: 9px;
+  padding: 7px 9px;
+  box-sizing: border-box;
+  border: 1px solid rgba(188, 152, 82, .34);
+  border-radius: 5px;
+  outline: none;
+  background: rgba(5, 13, 20, .72);
+  color: #eadfca;
+  font-size: 12px;
+}
+.ycm-strategic-search:focus { border-color: #c9a742; box-shadow: 0 0 0 2px rgba(201, 167, 66, .14); }
 .ycm-strategic-index {
   flex: 1;
   display: flex;
@@ -1427,6 +1440,7 @@
   box-shadow: inset 3px 0 #55b6ca;
   transform: translateX(2px);
 }
+.ycm-strategic-index-item.is-current-pos { box-shadow: inset 3px 0 #d85c4a; }
 .ycm-strategic-index-item strong,
 .ycm-strategic-index-item span { display: block; }
 .ycm-strategic-index-item strong { color: #ead38d; font-size: 12px; }
@@ -1461,18 +1475,16 @@
 .ycm-nation-city {
   position: absolute;
   transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 11px;
-  border: 1px solid rgba(224, 193, 126, .7);
-  border-radius: 16px;
-  background: rgba(7, 17, 23, .84);
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #f1dfb0;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, .68);
   cursor: pointer;
   pointer-events: auto;
-  transition: transform .16s, box-shadow .16s, background .16s;
+  overflow: visible;
+  transition: transform .16s;
 }
 .ycm-nation-city:hover,
 .ycm-nation-city:focus-visible,
@@ -1480,39 +1492,81 @@
   z-index: 9;
   outline: none;
   transform: translate(-50%, -50%) scale(1.13);
-  background: rgba(24, 67, 77, .94);
-  border-color: #f0c958;
-  box-shadow: 0 0 0 4px rgba(62, 157, 180, .44), 0 0 20px rgba(240, 201, 88, .78);
 }
 .ycm-nation-city-dot {
-  width: 11px;
-  height: 11px;
-  flex: 0 0 11px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
   border: 2px solid #f0ca67;
   border-radius: 50%;
   background: #92512e;
-  box-shadow: 0 0 6px rgba(241, 199, 98, .75);
+  box-shadow: 0 0 0 3px rgba(8, 18, 24, .72), 0 0 8px rgba(241, 199, 98, .8);
+  transform: translate(-50%, -50%);
 }
 .ycm-nation-city.is-capital {
-  padding: 8px 13px;
-  border-color: #f1ce66;
-  background: rgba(91, 34, 23, .9);
+  width: 24px;
+  height: 24px;
 }
 .ycm-nation-city.is-capital .ycm-nation-city-dot {
   width: 15px;
   height: 15px;
-  flex-basis: 15px;
   border-radius: 3px;
-  transform: rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
   background: #d59522;
 }
+.ycm-nation-city.is-current-pos .ycm-nation-city-dot {
+  border-color: #fff0cf;
+  background: #d64b3d;
+  box-shadow: 0 0 0 5px rgba(214, 75, 61, .3), 0 0 16px rgba(255, 112, 88, .95);
+}
+.ycm-nation-city.is-selected .ycm-nation-city-dot {
+  border-color: #fff1a6;
+  background: #238aa4;
+  box-shadow: 0 0 0 5px rgba(62, 157, 180, .42), 0 0 18px rgba(240, 201, 88, .9);
+}
+.ycm-nation-city.is-current-pos.is-selected .ycm-nation-city-dot {
+  background: linear-gradient(135deg, #d64b3d 0 48%, #238aa4 52% 100%);
+}
 .ycm-nation-city-name {
+  position: absolute;
+  left: 26px;
+  top: 50%;
+  padding: 5px 9px;
+  border: 1px solid rgba(224, 193, 126, .7);
+  border-radius: 14px;
+  background: rgba(7, 17, 23, .84);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .68);
   font-family: "STKaiti", "KaiTi", serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   white-space: nowrap;
   text-shadow: 0 2px 3px #000;
+  transform: translateY(-50%);
 }
+.ycm-nation-city[data-label-placement="left"] .ycm-nation-city-name { left: auto; right: 26px; }
+.ycm-nation-city[data-label-placement="top"] .ycm-nation-city-name { left: 50%; top: auto; bottom: 25px; transform: translateX(-50%); }
+.ycm-nation-city[data-label-placement="bottom"] .ycm-nation-city-name { left: 50%; top: 25px; transform: translateX(-50%); }
+.ycm-nation-city:hover .ycm-nation-city-name,
+.ycm-nation-city:focus-visible .ycm-nation-city-name,
+.ycm-nation-city.is-selected .ycm-nation-city-name { border-color: #f0c958; background: rgba(24, 67, 77, .94); }
+.ycm-strategic-detail {
+  flex: 0 0 auto;
+  max-height: 155px;
+  overflow: auto;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(212, 175, 55, .22);
+  color: #bdb19d;
+  font-size: 10px;
+  line-height: 1.45;
+}
+.ycm-strategic-detail p { margin: 3px 0; }
+.ycm-strategic-detail-title { display: block; color: #f0cf78; font-size: 13px; }
+.ycm-strategic-detail-hint { color: #837b70; }
+.ycm-strategic-current-tag { display: inline-block; margin-top: 4px; padding: 2px 6px; border-radius: 8px; background: #8d342d; color: #fff0df; }
+.ycm-strategic-open-city { width: 100%; margin-top: 7px; padding: 6px; border: 1px solid #b99642; border-radius: 4px; background: rgba(89, 55, 22, .72); color: #f2d487; cursor: pointer; }
 .ycm-strategic-controls { z-index: 70; }
 
 /* 永安美术底图与覆盖层 */
@@ -1570,8 +1624,8 @@
   .ycm-map-cartouche { display: none; }
   .ycm-state-glyph { min-width: 48px; height: 48px; font-size: 31px; }
   .ycm-capital-label { font-size: 12px; }
-  .ycm-nation-city { padding: 6px 9px; }
-  .ycm-nation-city-name { font-size: 16px; }
+  .ycm-nation-city { padding: 0; }
+  .ycm-nation-city-name { font-size: 14px; }
   .ycm-city-view-container { height: 620px; }
 }
 

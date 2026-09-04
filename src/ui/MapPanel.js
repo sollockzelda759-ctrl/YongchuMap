@@ -698,6 +698,7 @@ export default class MapPanel {
       container: mount,
       mode: 'world',
       worldData: this._currentWorldRef?.worldData,
+      artAssetUrl: this._currentWorldRef?.artAssetUrl,
       onNationClick: nationId => this.navigateToNation(nationId)
     });
     this._strategicMapRenderer.init();
@@ -732,12 +733,18 @@ export default class MapPanel {
     `;
     const mount = container.querySelector('#ycm-strategic-map-mount');
     if (!mount) return;
+    const physicalCityId = this.store?.getState()?.physical_state?.city_id || null;
+    const currentCityId = (nationRef.nationData?.cities || []).some(city => city.id === physicalCityId)
+      ? physicalCityId
+      : null;
     this._strategicMapRenderer = new StrategicMapRenderer({
       container: mount,
       mode: 'nation',
       worldData: this._currentWorldRef?.worldData,
       nationData: nationRef.nationData,
-      onCityClick: cityId => this.navigateToCity(cityId)
+      artAssetUrl: nationRef.artAssetUrl,
+      currentCityId,
+      onCityOpen: cityId => this.navigateToCity(cityId)
     });
     this._strategicMapRenderer.init();
   }

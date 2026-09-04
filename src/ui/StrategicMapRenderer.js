@@ -13,20 +13,14 @@ const WORLD_LAYOUT = {
   chen:      { x: 72, y: 76, width: 34, height: 31 }
 };
 
-const NATION_LAYOUT = {
-  qingbicheng: { x: 50, y: 17 }, yunling: { x: 49, y: 29 },
-  luokou: { x: 16, y: 49 }, fengshui: { x: 29, y: 43 },
-  pingchuan: { x: 42, y: 38 }, yongan: { x: 50, y: 54 },
-  heqing: { x: 63, y: 45 }, dongqiu: { x: 84, y: 38 },
-  shimen: { x: 82, y: 58 }, bailu: { x: 58, y: 65 },
-  nanxi: { x: 29, y: 73 }, dujiang: { x: 47, y: 82 },
-  linlan: { x: 72, y: 76 }
-};
-
-const SVG_NS = 'http://www.w3.org/2000/svg';
 const MAP_ASSETS = {
-  world: new URL('../../assets/maps/yongchu-world-v2.png', import.meta.url).href,
-  nation: new URL('../../assets/maps/zhaoguo-national-v2.png', import.meta.url).href
+  world: new URL('../../assets/maps/yongchu/world.png', import.meta.url).href,
+  zhao_guo: new URL('../../assets/maps/yongchu/nations/zhao_guo.png', import.meta.url).href,
+  yan: new URL('../../assets/maps/yongchu/nations/yan.png', import.meta.url).href,
+  zhao: new URL('../../assets/maps/yongchu/nations/zhao.png', import.meta.url).href,
+  chu: new URL('../../assets/maps/yongchu/nations/chu.png', import.meta.url).href,
+  liang: new URL('../../assets/maps/yongchu/nations/liang.png', import.meta.url).href,
+  chen: new URL('../../assets/maps/yongchu/nations/chen.png', import.meta.url).href
 };
 
 export default class StrategicMapRenderer {
@@ -37,8 +31,11 @@ export default class StrategicMapRenderer {
     this.nationData = options.nationData || null;
     this.onNationClick = options.onNationClick || null;
     this.onCityClick = options.onCityClick || null;
+    this.onCityOpen = options.onCityOpen || null;
+    this.currentCityId = options.currentCityId || null;
+    this.artAssetUrl = options.artAssetUrl || null;
     this.worldWidth = 1200;
-    this.worldHeight = 800;
+    this.worldHeight = 900;
     this.zoom = 0.6;
     this.minZoom = 0.45;
     this.maxZoom = 2.2;
@@ -53,6 +50,7 @@ export default class StrategicMapRenderer {
     this._viewportEl = null;
     this._worldEl = null;
     this._indexEl = null;
+    this._detailEl = null;
   }
 
   init() {
@@ -74,7 +72,7 @@ export default class StrategicMapRenderer {
       : `${this.nationData?.full_name || this.nationData?.name || '本国'} · 山河城邑`;
     const note = document.createElement('div');
     note.className = 'ycm-map-section-note';
-    note.textContent = '美术布局示意 · 地名与地理信息以正式资料为准';
+    note.textContent = '底图与交互层分离 · visualCoord 仅用于百分比显示';
     heading.appendChild(title);
     heading.appendChild(note);
     root.appendChild(heading);
@@ -83,7 +81,7 @@ export default class StrategicMapRenderer {
     layout.className = 'ycm-strategic-layout';
     const viewport = document.createElement('div');
     viewport.className = 'ycm-strategic-viewport';
-    viewport.setAttribute('aria-label', this.mode === 'world' ? '永初大陆六国地图' : '昭国十三城地图');
+    viewport.setAttribute('aria-label', this.mode === 'world' ? '永初大陆六国地图' : `${this.nationData?.name || '国家'}城邑地图`);
     this._viewportEl = viewport;
 
     const mapWorld = document.createElement('div');
@@ -91,7 +89,7 @@ export default class StrategicMapRenderer {
     this._worldEl = mapWorld;
     const art = document.createElement('img');
     art.className = 'ycm-strategic-art';
-    art.src = MAP_ASSETS[this.mode];
+    art.src = this._getArtAssetUrl();
     art.alt = '';
     art.draggable = false;
     art.setAttribute('aria-hidden', 'true');
@@ -103,7 +101,9 @@ export default class StrategicMapRenderer {
 
     const cartouche = document.createElement('div');
     cartouche.className = 'ycm-map-cartouche';
-    cartouche.textContent = this.mode === 'world' ? '永初大陆 · 山河万里' : '昭国疆域 · 城邑相连';
+    cartouche.textContent = this.mode === 'world'
+      ? '永初大陆 · 山河万里'
+      : `${this.nationData?.name || '本国'}国疆域 · 城邑相连`;
     viewport.appendChild(cartouche);
 
     const drawer = document.createElement('aside');
@@ -112,11 +112,22 @@ export default class StrategicMapRenderer {
     drawerTitle.className = 'ycm-strategic-drawer-title';
     drawerTitle.textContent = this.mode === 'world' ? '六国索引' : `城邑索引 (${this.nationData?.cities?.length || 0})`;
     drawer.appendChild(drawerTitle);
+    const search = document.createElement('input');
+    search.className = 'ycm-strategic-search';
+    search.type = 'search';
+    search.placeholder = this.mode === 'world' ? '搜索国家' : '搜索城邑';
+    search.setAttribute('aria-label', search.placeholder);
+    drawer.appendChild(search);
     const index = document.createElement('div');
     index.className = 'ycm-strategic-index';
     this._indexEl = index;
     this._renderIndex(index);
     drawer.appendChild(index);
+    const detail = document.createElement('div');
+    detail.className = 'ycm-strategic-detail';
+    this._detailEl = detail;
+    this._renderDetail(null);
+    drawer.appendChild(detail);
     layout.appendChild(viewport);
     layout.appendChild(drawer);
     root.appendChild(layout);
@@ -124,6 +135,12 @@ export default class StrategicMapRenderer {
     this._rootEl = root;
     this.resetView();
     this._bindEvents();
+    search.addEventListener('input', () => this._filterIndex(search.value));
+    search.addEventListener('keydown', event => {
+      if (event.key !== 'Enter') return;
+      const first = Array.from(this._indexEl?.querySelectorAll('.ycm-strategic-index-item') || []).find(item => !item.hidden);
+      first?.click?.();
+    });
   }
 
   _createControls() {
@@ -143,7 +160,7 @@ export default class StrategicMapRenderer {
     const overlay = document.createElement('div');
     overlay.className = 'ycm-world-overlay';
     (this.worldData?.nations || []).forEach(nation => {
-      const position = WORLD_LAYOUT[nation.id];
+      const position = nation.visualCoord || WORLD_LAYOUT[nation.id];
       if (!position) return;
       const button = document.createElement('button');
       button.type = 'button';
@@ -172,38 +189,21 @@ export default class StrategicMapRenderer {
   }
 
   _renderNation(mapWorld) {
-    const routesSvg = this._svg('svg', { class: 'ycm-nation-routes', viewBox: '0 0 1200 800', 'aria-hidden': 'true' });
-    (this.nationData?.internal_routes || []).forEach(route => {
-      const ids = [route.from, ...(route.via || []), route.to];
-      const points = ids.map(id => NATION_LAYOUT[id]).filter(Boolean).map(point => ({ x: point.x * 12, y: point.y * 8 }));
-      if (points.length < 2) return;
-      const path = this._svg('path', { class: 'ycm-nation-route', d: this._routePath(points) });
-      const title = this._svg('title');
-      title.textContent = route.name || '';
-      path.appendChild(title);
-      routesSvg.appendChild(path);
-    });
-    mapWorld.appendChild(routesSvg);
-
-    const features = this.worldData?.natural_features || {};
-    const labels = document.createElement('div');
-    labels.className = 'ycm-terrain-labels';
-    this._addTerrainLabel(labels, 49, 7, (features.mountain_ranges || []).find(item => item.id === 'qingping_mountains')?.name, 'mountain');
-    this._addTerrainLabel(labels, 24, 39, (features.rivers || []).find(item => item.id === 'luoshui')?.name, 'river');
-    this._addTerrainLabel(labels, 52, 87, (features.rivers || []).find(item => item.id === 'lanjiang')?.name, 'river');
-    mapWorld.appendChild(labels);
-
     const citiesLayer = document.createElement('div');
     citiesLayer.className = 'ycm-nation-cities';
-    (this.nationData?.cities || []).forEach(city => {
-      const position = NATION_LAYOUT[city.id];
+    const cities = this.nationData?.cities || [];
+    cities.forEach((city, index) => {
+      const position = city.visualCoord;
       if (!position) return;
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'ycm-nation-city';
       if (city.id === this.nationData?.capital_city_id) button.classList.add('is-capital');
+      if (city.id === this.currentCityId) button.classList.add('is-current-pos');
       button.setAttribute('data-city-id', city.id);
-      button.setAttribute('aria-label', `查看${city.name}城`);
+      button.setAttribute('data-label-placement', this._getLabelPlacement(city, index, cities));
+      button.setAttribute('aria-label', `查看${city.name}`);
+      if (city.id === this.currentCityId) button.setAttribute('aria-current', 'location');
       button.style.left = `${position.x}%`;
       button.style.top = `${position.y}%`;
       const dot = document.createElement('span');
@@ -227,6 +227,8 @@ export default class StrategicMapRenderer {
       button.className = 'ycm-strategic-index-item';
       const attr = this.mode === 'world' ? 'data-index-nation-id' : 'data-index-city-id';
       button.setAttribute(attr, record.id);
+      button.setAttribute('data-search-text', `${record.name || ''} ${record.fullName || ''} ${record.type || ''}`.toLowerCase());
+      if (this.mode === 'nation' && record.id === this.currentCityId) button.classList.add('is-current-pos');
       const name = document.createElement('strong');
       name.textContent = this.mode === 'world' ? (record.fullName || record.name) : record.name;
       const meta = document.createElement('span');
@@ -241,21 +243,99 @@ export default class StrategicMapRenderer {
   }
 
   selectNation(nationId) {
-    const position = WORLD_LAYOUT[nationId];
+    const record = (this.worldData?.nations || []).find(nation => nation.id === nationId);
+    const position = record?.visualCoord || WORLD_LAYOUT[nationId];
     if (!position) return;
     this._selectedId = nationId;
     this._syncSelected('nation', nationId);
-    this.focusCoordinates(position.x * 12, position.y * 8, Math.max(this.fitZoom * 1.2, 0.72));
+    this._renderDetail(record);
+    this.focusCoordinates(position.x * 12, position.y * 9, Math.max(this.fitZoom * 1.2, 0.72));
     this.onNationClick?.(nationId);
   }
 
   selectCity(cityId) {
-    const position = NATION_LAYOUT[cityId];
+    const record = (this.nationData?.cities || []).find(city => city.id === cityId);
+    const position = record?.visualCoord;
     if (!position) return;
     this._selectedId = cityId;
     this._syncSelected('city', cityId);
-    this.focusCoordinates(position.x * 12, position.y * 8, Math.max(this.fitZoom * 1.35, 0.82));
-    this.onCityClick?.(cityId);
+    this._renderDetail(record);
+    this.focusCoordinates(position.x * 12, position.y * 9, Math.max(this.fitZoom * 1.35, 0.82));
+    this.onCityClick?.(cityId, record);
+  }
+
+  _getArtAssetUrl() {
+    if (this.artAssetUrl) return this.artAssetUrl;
+    if (this.mode === 'world') return MAP_ASSETS.world;
+    return MAP_ASSETS[this.nationData?.id] || '';
+  }
+
+  _filterIndex(query) {
+    const needle = String(query || '').trim().toLowerCase();
+    this._indexEl?.querySelectorAll('.ycm-strategic-index-item').forEach(item => {
+      const haystack = item.getAttribute('data-search-text') || '';
+      item.hidden = !!needle && !haystack.includes(needle);
+    });
+  }
+
+  _renderDetail(record) {
+    if (!this._detailEl) return;
+    this._detailEl.innerHTML = '';
+    if (!record) {
+      const hint = document.createElement('p');
+      hint.className = 'ycm-strategic-detail-hint';
+      hint.textContent = this.mode === 'world' ? '点击国号进入对应国家地图。' : '点击城邑标记查看正式资料。';
+      this._detailEl.appendChild(hint);
+      return;
+    }
+
+    const title = document.createElement('strong');
+    title.className = 'ycm-strategic-detail-title';
+    title.textContent = this.mode === 'world' ? (record.fullName || record.name) : record.name;
+    this._detailEl.appendChild(title);
+
+    const fields = this.mode === 'world'
+      ? [record.geographicPosition, record.terrain]
+      : [record.type, record.position_in_nation, record.features];
+    fields.filter(Boolean).forEach(value => {
+      const line = document.createElement('p');
+      line.textContent = value;
+      this._detailEl.appendChild(line);
+    });
+
+    if (this.mode === 'nation' && record.id === this.currentCityId) {
+      const current = document.createElement('span');
+      current.className = 'ycm-strategic-current-tag';
+      current.textContent = '当前位置';
+      this._detailEl.appendChild(current);
+    }
+
+    if (this.mode === 'nation' && record.city_data_file && this.onCityOpen) {
+      const open = document.createElement('button');
+      open.type = 'button';
+      open.className = 'ycm-strategic-open-city';
+      open.textContent = '进入城市地图';
+      open.addEventListener('click', event => {
+        event.stopPropagation();
+        this.onCityOpen(record.id);
+      });
+      this._detailEl.appendChild(open);
+    }
+  }
+
+  _getLabelPlacement(city, index, cities) {
+    const position = city.visualCoord || {};
+    if (position.labelPlacement) return position.labelPlacement;
+    if (position.x < 16) return 'right';
+    if (position.x > 84) return 'left';
+    if (position.y < 14) return 'bottom';
+    if (position.y > 86) return 'top';
+
+    const nearbyBefore = cities.slice(0, index).filter(other => {
+      const otherPosition = other.visualCoord || {};
+      return Math.abs((otherPosition.x || 0) - position.x) < 13 && Math.abs((otherPosition.y || 0) - position.y) < 10;
+    }).length;
+    return nearbyBefore % 2 ? 'left' : 'right';
   }
 
   _syncSelected(type, id) {
@@ -393,37 +473,12 @@ export default class StrategicMapRenderer {
     element.style.height = `${position.height}%`;
   }
 
-  _addTerrainLabel(container, x, y, text, type) {
-    if (!text) return;
-    const label = document.createElement('span');
-    label.className = `ycm-terrain-label ycm-terrain-${type}`;
-    label.style.left = `${x}%`;
-    label.style.top = `${y}%`;
-    label.textContent = text;
-    container.appendChild(label);
-  }
-
-  _routePath(points) {
-    if (points.length === 2) {
-      const [a, b] = points;
-      const cx = (a.x + b.x) / 2;
-      const cy = (a.y + b.y) / 2 - Math.min(24, Math.abs(b.x - a.x) * 0.05);
-      return `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
-    }
-    return points.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
-  }
-
-  _svg(tag, attributes = {}) {
-    const node = document.createElementNS(SVG_NS, tag);
-    Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, String(value)));
-    return node;
-  }
-
   destroy() {
     if (this.container) this.container.innerHTML = '';
     this._rootEl = null;
     this._viewportEl = null;
     this._worldEl = null;
     this._indexEl = null;
+    this._detailEl = null;
   }
 }

@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "id": "liang",
+  "name": "梁",
+  "full_name": "大梁",
+  "world_id": "yongchu",
+  "art_asset": "../../../../assets/maps/yongchu/nations/liang.png",
+  "capital_city_id": "jincheng",
+  "cities": [
+    { "id": "jincheng", "name": "金城", "type": "都城/西域商馆商会之都", "population": 650000, "position_in_nation": "梁国中部河谷绿洲", "features": "西域商馆、商会与全国道路中枢", "visualCoord": { "x": 59, "y": 50, "labelPlacement": "top" } },
+    { "id": "yumen_zhen", "name": "玉门镇", "type": "商路护卫补给中转站", "population": 110000, "position_in_nation": "梁国西部商路", "features": "戈壁商队的护卫与补给中转站", "visualCoord": { "x": 34, "y": 50, "labelPlacement": "top" } },
+    { "id": "dongguan", "name": "东关", "type": "昭梁边境最大陆路关口", "population": 80000, "position_in_nation": "梁国东部边境", "features": "通往昭国的最大陆路关口", "visualCoord": { "x": 88, "y": 50, "labelPlacement": "left" } },
+    { "id": "quancheng", "name": "泉城", "type": "戈壁唯一水源绿洲城", "population": 30000, "position_in_nation": "梁国西部戈壁", "features": "以环城泉湖维系的绿洲城", "visualCoord": { "x": 13, "y": 47, "labelPlacement": "right" } },
+    { "id": "hegu", "name": "河谷", "type": "引水渠网粮仓农业城", "population": 160000, "position_in_nation": "梁国中南部河谷", "features": "引水渠网与农业粮仓", "visualCoord": { "x": 62, "y": 66, "labelPlacement": "right" } },
+    { "id": "nanai", "name": "南隘", "type": "梁楚山道关口", "population": 20000, "position_in_nation": "梁国南部山口", "features": "冬季封闭三个月的梁楚山道", "visualCoord": { "x": 55, "y": 93, "labelPlacement": "top" } }
+  ]
+}

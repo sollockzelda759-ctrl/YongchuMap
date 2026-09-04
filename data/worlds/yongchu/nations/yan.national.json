@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "id": "yan",
+  "name": "燕",
+  "full_name": "大燕",
+  "world_id": "yongchu",
+  "art_asset": "../../../../assets/maps/yongchu/nations/yan.png",
+  "capital_city_id": "fengtian",
+  "cities": [
+    { "id": "fengtian", "name": "奉天", "type": "都城", "population": 980000, "position_in_nation": "燕国中部平原", "features": "燕国政治中枢与北方交通中心", "visualCoord": { "x": 51, "y": 34, "labelPlacement": "right" } },
+    { "id": "baimacheng", "name": "白马城", "type": "草原边境城/最大马市", "population": 150000, "position_in_nation": "燕国北部草原", "features": "北境马市与草原商路节点", "visualCoord": { "x": 47, "y": 22, "labelPlacement": "right" } },
+    { "id": "nanguan", "name": "南关", "type": "军事要塞", "population": 90000, "position_in_nation": "燕国南部青屏山口", "features": "隔青屏山脉与昭国对峙", "visualCoord": { "x": 50, "y": 78, "labelPlacement": "top" } },
+    { "id": "tieyingzhai", "name": "铁鹰寨", "type": "军屯城", "population": 160000, "position_in_nation": "燕国西南部", "features": "南线军屯与边防补给地", "visualCoord": { "x": 43, "y": 55, "labelPlacement": "left" } },
+    { "id": "hecheng", "name": "合城", "type": "燕赵互市城", "population": 220000, "position_in_nation": "燕国东南部", "features": "燕赵唯一合法互市口岸", "visualCoord": { "x": 81, "y": 57, "labelPlacement": "left" } },
+    { "id": "huangqiu", "name": "荒丘", "type": "草原前哨", "population": 40000, "position_in_nation": "燕国北部草原深处", "features": "草原边缘的前哨与驿路节点", "visualCoord": { "x": 46, "y": 12, "labelPlacement": "bottom" } }
+  ]
+}

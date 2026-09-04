@@ -88,7 +88,8 @@ export default class MapDataLoader {
     const data = await this._loadJson(worldUrl);
     const result = {
       worldData: data,
-      baseUrl: worldUrl
+      baseUrl: worldUrl,
+      artAssetUrl: this._resolveAssetUrl(data.art_asset, worldUrl)
     };
     this._cache.set(cacheKey, result);
     return result;
@@ -124,6 +125,7 @@ export default class MapDataLoader {
       nationMeta,
       nationData: loaded.data,
       baseUrl: loaded.url,
+      artAssetUrl: this._resolveAssetUrl(loaded.data.art_asset, loaded.url),
       hasDetail: true
     };
   }
@@ -196,5 +198,14 @@ export default class MapDataLoader {
 
   clearCache() {
     this._cache.clear();
+  }
+
+  _resolveAssetUrl(relPath, baseUrl) {
+    if (!relPath || !baseUrl) return null;
+    try {
+      return new URL(relPath, baseUrl).href;
+    } catch (_) {
+      return null;
+    }
   }
 }

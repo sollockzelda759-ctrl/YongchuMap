@@ -71,7 +71,15 @@ async function runTests() {
   console.log('  包含 13 个城市:', zhaoRef.nationData.cities.length === 13 ? '✓' : '✗');
 
   const yanRef = await loader.loadNation(worldRef, 'yan');
-  console.log('  无详细图国家 (大燕) 降级兜底:', yanRef.hasDetail === false ? '✓' : '✗');
+  assert.equal(yanRef.hasDetail, true);
+  assert.equal(yanRef.nationData.cities.length, 6);
+  const nationRefs = await Promise.all(['zhao_guo', 'yan', 'zhao', 'chu', 'liang', 'chen'].map(id => loader.loadNation(worldRef, id)));
+  assert.ok(nationRefs.every(ref => ref.hasDetail && ref.artAssetUrl));
+  assert.deepEqual(nationRefs.map(ref => ref.nationData.cities.length), [13, 6, 6, 6, 6, 6]);
+  assert.ok(nationRefs.every(ref => ref.nationData.cities.every(city =>
+    Number.isFinite(city.visualCoord?.x) && Number.isFinite(city.visualCoord?.y)
+  )));
+  console.log('  六国国家数据、正式城市与百分比 visualCoord 全部加载: ✓');
 
   const yonganRef = await loader.loadCity(worldRef, zhaoRef, 'yongan');
   assert.equal(yonganRef.hasDetail, true);
@@ -148,10 +156,11 @@ async function runTests() {
   assert.equal(panel.navState.nationId, 'zhao');
   assert.equal(panel._currentNationRef?.nationMeta?.fullName, '大赵');
 
-  // 未勘绘国家测试
+  // 六国国家层现在全部具备正式底图与城市覆盖数据
   await panel.navigateToNation('yan');
-  assert.equal(panel._currentNationRef?.hasDetail, false);
-  console.log('  未勘绘国家层级状态:', panel.navState.nationId === 'yan' && panel._currentNationRef?.hasDetail === false ? '✓' : '✗');
+  assert.equal(panel._currentNationRef?.hasDetail, true);
+  assert.equal(panel._currentNationRef?.nationData?.cities?.length, 6);
+  console.log('  燕国国家层及六城数据可进入: ✓');
 
   console.log('\n【测试4】面包屑回退导航 (City -> Nation -> World)');
   await panel.navigateToNation('zhao_guo');
@@ -392,25 +401,27 @@ async function runTests() {
   console.log('  世界地图六国仅渲染单字国号且六区可交互: ✓');
 
   const nationMount = new FakeElement('div');
-  const nationRenderer = new StrategicMapRenderer({ container: nationMount, mode: 'nation', worldData: worldRef.worldData, nationData: zhaoRef.nationData });
+  const nationRenderer = new StrategicMapRenderer({ container: nationMount, mode: 'nation', worldData: worldRef.worldData, nationData: zhaoRef.nationData, currentCityId: 'yongan' });
   nationRenderer.init();
   assert.equal(nationMount.querySelectorAll('[data-city-id]').length, 13);
   assert.equal(nationMount.querySelectorAll('.ycm-nation-city-name').length, 13);
-  assert.equal(nationMount.querySelectorAll('.ycm-nation-route').length, zhaoRef.nationData.internal_routes.length);
+  assert.equal(nationMount.querySelectorAll('.ycm-nation-route').length, 0, '当前阶段不得把路线/里程数据绘制成视觉几何');
   assert.ok(nationMount.querySelector('.ycm-map-controls'), '国家层必须具备缩放/重置工具栏');
+  assert.ok(nationMount.querySelector('.ycm-strategic-search'), '国家层必须保留搜索能力');
   assert.ok(!nationMount.querySelector('.ycm-strategic-world').querySelectorAll('.ycm-terrain-label').some(node => node.textContent === '昭'));
+  assert.ok(nationMount.querySelector('[data-city-id="yongan"]').classList.contains('is-current-pos'));
   nationRenderer.selectCity('yongan');
   assert.ok(nationMount.querySelector('[data-city-id="yongan"]').classList.contains('is-selected'));
   assert.ok(nationMount.querySelector('[data-index-city-id="yongan"]').classList.contains('is-selected'));
-  console.log('  昭国地图从正式数据渲染 13 城且无地形中央巨型国号: ✓');
+  console.log('  昭国地图从正式数据渲染 13 城，选中态与当前位置独立: ✓');
 
   const artPaths = [
-    join(__dirname, 'assets', 'maps', 'yongchu-world-v2.png'),
-    join(__dirname, 'assets', 'maps', 'zhaoguo-national-v2.png'),
+    join(__dirname, 'assets', 'maps', 'yongchu', 'world.png'),
+    ...['zhao_guo', 'yan', 'zhao', 'chu', 'liang', 'chen'].map(id => join(__dirname, 'assets', 'maps', 'yongchu', 'nations', `${id}.png`)),
     join(__dirname, 'assets', 'maps', 'yongan-city-v2.png')
   ];
-  assert.ok(artPaths.every(path => existsSync(path) && statSync(path).size > 500000), '三层正式美术底图必须存在且不是占位图');
-  console.log('  世界、国家、城市三张无文字美术底图已接入: ✓');
+  assert.ok(artPaths.every(path => existsSync(path) && statSync(path).size > 500000), '世界、六国与永安美术底图必须存在且不是占位图');
+  console.log('  世界无字底图、六国底图与永安城市底图全部接入: ✓');
 
   const cityMount = new FakeElement('div');
   const selectionRenderer = new YonganCityMapRenderer({

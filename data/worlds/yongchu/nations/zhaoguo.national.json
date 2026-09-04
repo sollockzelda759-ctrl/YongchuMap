@@ -4,6 +4,7 @@
   "name": "昭",
   "full_name": "大昭",
   "world_id": "yongchu",
+  "art_asset": "../../../../assets/maps/yongchu/nations/zhao_guo.png",
   "capital_city_id": "yongan",
   "territory": {
     "east_west_li": 800,
@@ -48,6 +49,7 @@
       "name": "永安",
       "type": "都城",
       "position_in_nation": "昭国中部偏南，洛水两岸",
+      "visualCoord": { "x": 51, "y": 46, "labelPlacement": "left" },
       "population": 850000,
       "floating_population": "8-12万 (中秋灯会可达105万)",
       "distance_from_capital_li": 0,
@@ -60,6 +62,7 @@
       "alias": "青屏",
       "type": "北境军镇",
       "position_in_nation": "昭国北部，青屏山脉南麓",
+      "visualCoord": { "x": 50, "y": 15, "labelPlacement": "bottom" },
       "population": 120000,
       "garrison": 50000,
       "distance_from_capital_li": 900,
@@ -76,6 +79,7 @@
       "name": "临澜",
       "type": "江城/水乡",
       "position_in_nation": "昭国南部，澜江北岸",
+      "visualCoord": { "x": 72, "y": 87, "labelPlacement": "top" },
       "population": 280000,
       "distance_from_capital_li": 600,
       "travel_time_from_yongan": {
@@ -91,6 +95,7 @@
       "name": "丰水",
       "type": "粮仓重镇",
       "position_in_nation": "昭国中部偏西，洛水平原腹地",
+      "visualCoord": { "x": 18, "y": 61, "labelPlacement": "right" },
       "population": 360000,
       "distance_from_capital_li": 200,
       "travel_time_from_yongan": {
@@ -105,6 +110,7 @@
       "name": "白鹿",
       "type": "文教城",
       "position_in_nation": "昭国中部偏南，永安以南百里",
+      "visualCoord": { "x": 58, "y": 66, "labelPlacement": "right" },
       "population": 220000,
       "distance_from_capital_li": 100,
       "travel_time_from_yongan": {
@@ -119,6 +125,7 @@
       "name": "洛口",
       "type": "商贸枢纽",
       "position_in_nation": "昭国西部，洛水上游，邻近梁国东关",
+      "visualCoord": { "x": 5, "y": 43, "labelPlacement": "right" },
       "population": 300000,
       "floating_population": "10万起",
       "distance_from_capital_li": 700,
@@ -135,6 +142,7 @@
       "name": "东丘",
       "type": "丘陵城镇",
       "position_in_nation": "昭国东部山林丘陵",
+      "visualCoord": { "x": 93, "y": 44, "labelPlacement": "left" },
       "population": 120000,
       "distance_from_capital_li": 500,
       "features": "半数靠山林过活，东丘特产青漆，猎户行会，永安高档鹿肉狐裘供货地"
@@ -144,6 +152,7 @@
       "name": "平川",
       "type": "腹地城镇",
       "position_in_nation": "昭国中部平原",
+      "visualCoord": { "x": 40, "y": 37, "labelPlacement": "left" },
       "distance_from_capital_li": 400,
       "historical_significance": "昭太祖平川之战定鼎之地",
       "features": "农耕重镇"
@@ -153,6 +162,7 @@
       "name": "河清",
       "type": "郡城",
       "position_in_nation": "昭国中近畿",
+      "visualCoord": { "x": 65, "y": 56, "labelPlacement": "right" },
       "distance_from_capital_li": 150,
       "features": "近畿重郡，灵家等世家学田族田集中分布区"
     },
@@ -161,6 +171,7 @@
       "name": "南溪",
       "type": "南部城镇",
       "position_in_nation": "昭国南部偏西",
+      "visualCoord": { "x": 42, "y": 76, "labelPlacement": "left" },
       "distance_from_capital_li": 500,
       "features": "通往楚国云梦方向与西南山区的驿路节点"
     },
@@ -169,6 +180,7 @@
       "name": "渡江",
       "type": "江防要冲",
       "position_in_nation": "昭国南部澜江沿线",
+      "visualCoord": { "x": 32, "y": 88, "labelPlacement": "top" },
       "distance_from_capital_li": 550,
       "distance_from_linlan_li": 200,
       "features": "澜江上游渡口防线"
@@ -178,6 +190,7 @@
       "name": "石门",
       "type": "关隘城镇",
       "position_in_nation": "昭国境内险要要道",
+      "visualCoord": { "x": 82, "y": 58, "labelPlacement": "left" },
       "distance_from_capital_li": 550,
       "features": "山地通道门户"
     },
@@ -186,6 +199,7 @@
       "name": "云岭",
       "type": "北境山前要冲",
       "position_in_nation": "昭国北部向青屏过渡山区",
+      "visualCoord": { "x": 75, "y": 21, "labelPlacement": "left" },
       "distance_from_capital_li": 650,
       "distance_from_qingbicheng_li": 300,
       "features": "三十座烽火台链的重要枢纽节点"

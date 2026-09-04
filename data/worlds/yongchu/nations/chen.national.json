@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "id": "chen",
+  "name": "陈",
+  "full_name": "大陈",
+  "world_id": "yongchu",
+  "art_asset": "../../../../assets/maps/yongchu/nations/chen.png",
+  "capital_city_id": "haimen",
+  "cities": [
+    { "id": "haimen", "name": "海门", "type": "都城/市舶司海贸天然深港", "population": 580000, "position_in_nation": "陈国中部海湾", "features": "市舶司、海贸与天然深港所在", "visualCoord": { "x": 49, "y": 38, "labelPlacement": "left" } },
+    { "id": "yanting", "name": "盐汀", "type": "官营盐田海盐之都", "population": 90000, "position_in_nation": "陈国南部盐田海岸", "features": "官营盐田与海盐生产中心", "visualCoord": { "x": 47, "y": 80, "labelPlacement": "top" } },
+    { "id": "jiangkou", "name": "江口", "type": "澜江入海口换装码头", "population": 140000, "position_in_nation": "陈国北部澜江入海口", "features": "江船与海船换装的水运码头", "visualCoord": { "x": 65, "y": 20, "labelPlacement": "bottom" } },
+    { "id": "longgutan", "name": "龙骨滩", "type": "皇家船坞与造船世家基地", "population": 80000, "position_in_nation": "陈国中南部海湾", "features": "皇家船坞与造船世家基地", "visualCoord": { "x": 49, "y": 60, "labelPlacement": "right" } },
+    { "id": "shanyu", "name": "珊屿", "type": "南部珊瑚采集海岛中转站", "population": 10000, "position_in_nation": "陈国东南海岛", "features": "珊瑚采集与岛屿航路中转站", "visualCoord": { "x": 83, "y": 82, "labelPlacement": "left" } },
+    { "id": "qingtian", "name": "青田", "type": "内陆丘陵梯田米仓城", "population": 120000, "position_in_nation": "陈国西部内陆丘陵", "features": "丘陵梯田与内陆米仓", "visualCoord": { "x": 18, "y": 43, "labelPlacement": "right" } }
+  ]
+}

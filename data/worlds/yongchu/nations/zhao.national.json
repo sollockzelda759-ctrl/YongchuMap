@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "id": "zhao",
+  "name": "赵",
+  "full_name": "大赵",
+  "world_id": "yongchu",
+  "art_asset": "../../../../assets/maps/yongchu/nations/zhao.png",
+  "capital_city_id": "tieling",
+  "cities": [
+    { "id": "tieling", "name": "铁陵", "type": "都城/矿山工匠之都", "population": 520000, "position_in_nation": "赵国中部山间盆地", "features": "矿脉、工匠与重甲军械中心", "visualCoord": { "x": 36, "y": 47, "labelPlacement": "right" } },
+    { "id": "kuangyuan", "name": "矿渊", "type": "矿区核心城", "population": 240000, "position_in_nation": "赵国西北矿山", "features": "深山矿区与冶炼重地", "visualCoord": { "x": 11, "y": 32, "labelPlacement": "right" } },
+    { "id": "chuitai", "name": "锤台", "type": "锻造学徒城", "population": 180000, "position_in_nation": "赵国东北山地", "features": "锻造工坊与匠人学徒聚集地", "visualCoord": { "x": 64, "y": 36, "labelPlacement": "right" } },
+    { "id": "jiaoan", "name": "礁岸", "type": "沿海暗港", "population": 70000, "position_in_nation": "赵国东部短海岸", "features": "礁石海岸上的隐蔽港城", "visualCoord": { "x": 83, "y": 51, "labelPlacement": "left" } },
+    { "id": "guanshan", "name": "关山", "type": "山区关隘", "population": 50000, "position_in_nation": "赵国西南山口", "features": "赵昭之间的山区关隘", "visualCoord": { "x": 22, "y": 72, "labelPlacement": "right" } },
+    { "id": "bitan", "name": "碧潭", "type": "淬火刀剑水城", "population": 60000, "position_in_nation": "赵国南部山间湖泊", "features": "以碧潭水淬炼刀剑闻名", "visualCoord": { "x": 58, "y": 81, "labelPlacement": "top" } }
+  ]
+}

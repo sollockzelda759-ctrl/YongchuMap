@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "id": "chu",
+  "name": "楚",
+  "full_name": "大楚",
+  "world_id": "yongchu",
+  "art_asset": "../../../../assets/maps/yongchu/nations/chu.png",
+  "capital_city_id": "yunmeng",
+  "cities": [
+    { "id": "yunmeng", "name": "云梦", "type": "都城/大泽水市之城", "population": 1050000, "position_in_nation": "楚国北部大泽", "features": "水上市集与泽上行宫环绕的都城", "visualCoord": { "x": 48, "y": 29, "labelPlacement": "bottom" } },
+    { "id": "baizuzhai", "name": "百族寨", "type": "南方深山宗族聚居地", "population": 30000, "position_in_nation": "楚国南部深山", "features": "南方宗族聚居与自治之地", "visualCoord": { "x": 58, "y": 88, "labelPlacement": "top" } },
+    { "id": "wudu", "name": "雾渡", "type": "昭楚边境走私集散地", "population": 50000, "position_in_nation": "楚国西北山地边境", "features": "借山雾通行的边境渡口", "visualCoord": { "x": 14, "y": 24, "labelPlacement": "right" } },
+    { "id": "liancha", "name": "莲汊", "type": "大泽渔镇", "population": 90000, "position_in_nation": "楚国东北湖汊", "features": "湖汊渔业与泽地水运节点", "visualCoord": { "x": 77, "y": 30, "labelPlacement": "left" } },
+    { "id": "yaowanggu", "name": "药王谷", "type": "深山野生药圃产地", "population": 40000, "position_in_nation": "楚国西南深山", "features": "山谷药圃与药材集散地", "visualCoord": { "x": 36, "y": 67, "labelPlacement": "left" } },
+    { "id": "canxiang", "name": "蚕乡", "type": "楚绸织染丘陵产地", "population": 120000, "position_in_nation": "楚国中部丘陵", "features": "桑蚕、织染与楚绸产地", "visualCoord": { "x": 48, "y": 49, "labelPlacement": "right" } }
+  ]
+}
