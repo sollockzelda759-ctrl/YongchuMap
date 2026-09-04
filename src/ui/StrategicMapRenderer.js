@@ -23,6 +23,20 @@ const MAP_ASSETS = {
   chen: new URL('../../assets/maps/yongchu/nations/chen.png', import.meta.url).href
 };
 
+const DRAG_THRESHOLD_PX = 8;
+const LABEL_PLACEMENTS = ['top', 'top-right', 'top-left', 'bottom-right', 'bottom-left'];
+const UI_CONTROL_SELECTOR = [
+  '.ycm-map-controls',
+  '.ycm-state-hotspot',
+  '.ycm-nation-city',
+  '.ycm-strategic-drawer',
+  '.ycm-calibration-panel',
+  'button',
+  'input',
+  'select',
+  'textarea'
+].join(',');
+
 export default class StrategicMapRenderer {
   constructor(options = {}) {
     this.container = options.container || null;
@@ -32,25 +46,39 @@ export default class StrategicMapRenderer {
     this.onNationClick = options.onNationClick || null;
     this.onCityClick = options.onCityClick || null;
     this.onCityOpen = options.onCityOpen || null;
+    this.onCalibrationNationChange = options.onCalibrationNationChange || null;
     this.currentCityId = options.currentCityId || null;
     this.artAssetUrl = options.artAssetUrl || null;
+    this.calibrationMode = this.mode === 'nation' && options.calibrationMode === true;
     this.worldWidth = 1200;
     this.worldHeight = 900;
-    this.zoom = 0.6;
-    this.minZoom = 0.45;
+    this.zoom = 1;
+    this.minZoom = 1;
     this.maxZoom = 2.2;
     this.panX = 0;
     this.panY = 0;
-    this.fitZoom = 0.6;
+    this.fitZoom = 1;
     this._selectedId = null;
     this._isDragging = false;
     this._dragMoved = false;
     this._captureEl = null;
+    this._resizeObserver = null;
+    this._windowResizeHandler = null;
+    this._lastViewportWidth = 0;
+    this._lastViewportHeight = 0;
     this._rootEl = null;
     this._viewportEl = null;
     this._worldEl = null;
     this._indexEl = null;
     this._detailEl = null;
+    this._calibrationPanelEl = null;
+    this._calibrationCitySelectEl = null;
+    this._calibrationCoordEl = null;
+    this._calibrationOutputEl = null;
+    this._calibrationPreviewEl = null;
+    this._calibrationCityId = this.nationData?.cities?.[0]?.id || null;
+    this._calibrationPending = null;
+    this._calibrationDrafts = new Map();
   }
 
   init() {
@@ -58,9 +86,11 @@ export default class StrategicMapRenderer {
   }
 
   render() {
+    this._unbindResizeObserver();
     this.container.innerHTML = '';
     const root = document.createElement('section');
     root.className = `ycm-strategic-map ycm-strategic-mode-${this.mode}`;
+    if (this.calibrationMode) root.classList.add('is-calibration-mode');
     root.setAttribute('data-layout-authority', 'illustrative-only');
 
     const heading = document.createElement('div');
@@ -131,10 +161,15 @@ export default class StrategicMapRenderer {
     layout.appendChild(viewport);
     layout.appendChild(drawer);
     root.appendChild(layout);
+    if (this.calibrationMode) {
+      this._calibrationPanelEl = this._createCalibrationPanel();
+      root.appendChild(this._calibrationPanelEl);
+    }
     this.container.appendChild(root);
     this._rootEl = root;
     this.resetView();
     this._bindEvents();
+    this._bindResizeObserver();
     search.addEventListener('input', () => this._filterIndex(search.value));
     search.addEventListener('keydown', event => {
       if (event.key !== 'Enter') return;
@@ -216,6 +251,20 @@ export default class StrategicMapRenderer {
       this._bindActivation(button, () => this.selectCity(city.id));
       citiesLayer.appendChild(button);
     });
+    if (this.calibrationMode) {
+      const preview = document.createElement('div');
+      preview.className = 'ycm-calibration-preview';
+      preview.setAttribute('aria-hidden', 'true');
+      const previewDot = document.createElement('span');
+      previewDot.className = 'ycm-calibration-preview-dot';
+      const previewLabel = document.createElement('span');
+      previewLabel.className = 'ycm-calibration-preview-label';
+      preview.appendChild(previewDot);
+      preview.appendChild(previewLabel);
+      preview.hidden = true;
+      citiesLayer.appendChild(preview);
+      this._calibrationPreviewEl = preview;
+    }
     mapWorld.appendChild(citiesLayer);
   }
 
@@ -257,6 +306,11 @@ export default class StrategicMapRenderer {
     const record = (this.nationData?.cities || []).find(city => city.id === cityId);
     const position = record?.visualCoord;
     if (!position) return;
+    if (this.calibrationMode) {
+      this._calibrationCityId = cityId;
+      if (this._calibrationCitySelectEl) this._calibrationCitySelectEl.value = cityId;
+      this._clearCalibrationPending();
+    }
     this._selectedId = cityId;
     this._syncSelected('city', cityId);
     this._renderDetail(record);
@@ -268,6 +322,204 @@ export default class StrategicMapRenderer {
     if (this.artAssetUrl) return this.artAssetUrl;
     if (this.mode === 'world') return MAP_ASSETS.world;
     return MAP_ASSETS[this.nationData?.id] || '';
+  }
+
+  _createCalibrationPanel() {
+    const panel = document.createElement('section');
+    panel.className = 'ycm-calibration-panel';
+    panel.setAttribute('aria-label', 'visualCoord 开发标定');
+
+    const header = document.createElement('div');
+    header.className = 'ycm-calibration-header';
+    const title = document.createElement('strong');
+    title.textContent = 'visualCoord 标定（仅开发）';
+    const warning = document.createElement('span');
+    warning.textContent = '只生成 JSON，不写入正式数据文件';
+    header.appendChild(title);
+    header.appendChild(warning);
+    panel.appendChild(header);
+
+    const controls = document.createElement('div');
+    controls.className = 'ycm-calibration-controls';
+    const nationSelect = this._createCalibrationSelect('国家', (this.worldData?.nations || []).map(nation => ({
+      value: nation.id,
+      label: nation.fullName || nation.name
+    })), this.nationData?.id);
+    nationSelect.select.addEventListener('change', () => {
+      if (nationSelect.select.value !== this.nationData?.id) this.onCalibrationNationChange?.(nationSelect.select.value);
+    });
+    controls.appendChild(nationSelect.field);
+
+    const citySelect = this._createCalibrationSelect('正式城市', (this.nationData?.cities || []).map(city => ({
+      value: city.id,
+      label: city.name
+    })), this._calibrationCityId);
+    this._calibrationCitySelectEl = citySelect.select;
+    citySelect.select.addEventListener('change', () => this._chooseCalibrationCity(citySelect.select.value));
+    controls.appendChild(citySelect.field);
+
+    const coords = document.createElement('div');
+    coords.className = 'ycm-calibration-coords';
+    coords.textContent = '点击地图上的真实城池中心';
+    this._calibrationCoordEl = coords;
+    controls.appendChild(coords);
+    panel.appendChild(controls);
+
+    const actions = document.createElement('div');
+    actions.className = 'ycm-calibration-actions';
+    const previous = this._createCalibrationButton('上一个', () => this._stepCalibrationCity(-1));
+    const next = this._createCalibrationButton('下一个', () => this._stepCalibrationCity(1));
+    const retry = this._createCalibrationButton('重新点击', () => this._clearCalibrationPending());
+    const confirm = this._createCalibrationButton('确认当前点', () => this._confirmCalibrationPoint(), 'is-primary');
+    confirm.disabled = true;
+    this._calibrationConfirmBtn = confirm;
+    const copy = this._createCalibrationButton('复制 JSON', () => this._copyCalibrationJson(), 'is-copy');
+    this._calibrationCopyBtn = copy;
+    [previous, next, retry, confirm, copy].forEach(button => actions.appendChild(button));
+    panel.appendChild(actions);
+
+    const output = document.createElement('textarea');
+    output.className = 'ycm-calibration-output';
+    output.readOnly = true;
+    output.spellcheck = false;
+    output.setAttribute('aria-label', '当前国家 visualCoord JSON');
+    this._calibrationOutputEl = output;
+    panel.appendChild(output);
+    this._refreshCalibrationOutput();
+    return panel;
+  }
+
+  _createCalibrationSelect(labelText, options, selectedValue) {
+    const field = document.createElement('label');
+    field.className = 'ycm-calibration-field';
+    const label = document.createElement('span');
+    label.textContent = labelText;
+    const select = document.createElement('select');
+    options.forEach(optionData => {
+      const option = document.createElement('option');
+      option.value = optionData.value;
+      option.textContent = optionData.label;
+      select.appendChild(option);
+    });
+    select.value = selectedValue || options[0]?.value || '';
+    field.appendChild(label);
+    field.appendChild(select);
+    return { field, select };
+  }
+
+  _createCalibrationButton(text, onClick, extraClass = '') {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `ycm-calibration-button ${extraClass}`.trim();
+    button.textContent = text;
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      onClick();
+    });
+    return button;
+  }
+
+  _chooseCalibrationCity(cityId) {
+    if (!(this.nationData?.cities || []).some(city => city.id === cityId)) return;
+    this._calibrationCityId = cityId;
+    if (this._calibrationCitySelectEl) this._calibrationCitySelectEl.value = cityId;
+    this._clearCalibrationPending();
+    this._syncSelected('city', cityId);
+  }
+
+  _stepCalibrationCity(delta) {
+    const cities = this.nationData?.cities || [];
+    if (!cities.length) return;
+    const currentIndex = Math.max(0, cities.findIndex(city => city.id === this._calibrationCityId));
+    const nextIndex = (currentIndex + delta + cities.length) % cities.length;
+    this._chooseCalibrationCity(cities[nextIndex].id);
+  }
+
+  _clearCalibrationPending() {
+    this._calibrationPending = null;
+    if (this._calibrationCoordEl) this._calibrationCoordEl.textContent = '点击地图上的真实城池中心';
+    if (this._calibrationConfirmBtn) this._calibrationConfirmBtn.disabled = true;
+    if (this._calibrationPreviewEl) this._calibrationPreviewEl.hidden = true;
+  }
+
+  _setCalibrationPoint(point) {
+    if (!point || !this._calibrationCityId) return;
+    this._calibrationPending = point;
+    if (this._calibrationCoordEl) {
+      this._calibrationCoordEl.textContent = `x ${point.x.toFixed(2)}% · y ${point.y.toFixed(2)}%`;
+    }
+    if (this._calibrationConfirmBtn) this._calibrationConfirmBtn.disabled = false;
+    this._updateCalibrationPreview();
+  }
+
+  _confirmCalibrationPoint() {
+    if (!this._calibrationPending || !this._calibrationCityId) return;
+    this._calibrationDrafts.set(this._calibrationCityId, { ...this._calibrationPending });
+    this._refreshCalibrationOutput();
+    if (this._calibrationCoordEl) {
+      this._calibrationCoordEl.textContent = `已确认 · x ${this._calibrationPending.x.toFixed(2)}% · y ${this._calibrationPending.y.toFixed(2)}%`;
+    }
+  }
+
+  _updateCalibrationPreview() {
+    if (!this._calibrationPreviewEl || !this._calibrationPending) return;
+    const city = (this.nationData?.cities || []).find(item => item.id === this._calibrationCityId);
+    this._calibrationPreviewEl.style.left = `${this._calibrationPending.x}%`;
+    this._calibrationPreviewEl.style.top = `${this._calibrationPending.y}%`;
+    const label = this._calibrationPreviewEl.querySelector('.ycm-calibration-preview-label');
+    if (label) label.textContent = `${city?.name || this._calibrationCityId} · 预览`;
+    this._calibrationPreviewEl.hidden = false;
+  }
+
+  _refreshCalibrationOutput() {
+    if (!this._calibrationOutputEl) return;
+    this._calibrationOutputEl.value = this.exportCalibrationJson();
+  }
+
+  exportCalibrationJson() {
+    const result = {};
+    (this.nationData?.cities || []).forEach(city => {
+      const point = this._calibrationDrafts.get(city.id);
+      result[city.id] = point ? {
+        x: Number(point.x.toFixed(2)),
+        y: Number(point.y.toFixed(2))
+      } : null;
+    });
+    return JSON.stringify(result, null, 2);
+  }
+
+  async _copyCalibrationJson() {
+    const text = this.exportCalibrationJson();
+    let copied = false;
+    try {
+      if (globalThis.navigator?.clipboard?.writeText) {
+        await globalThis.navigator.clipboard.writeText(text);
+        copied = true;
+      }
+    } catch (_) {}
+    if (!copied) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select?.();
+      try { copied = document.execCommand?.('copy') === true; } catch (_) {}
+      textarea.remove();
+    }
+    if (this._calibrationCopyBtn) this._calibrationCopyBtn.textContent = copied ? '已复制' : '请从文本框复制';
+  }
+
+  _clientPointToVisualCoord(clientX, clientY) {
+    if (!this._viewportEl || !Number.isFinite(this.zoom) || this.zoom <= 0) return null;
+    const rect = this._viewportEl.getBoundingClientRect();
+    const mapX = (clientX - rect.left - (this._viewportEl.clientLeft || 0) - this.panX) / this.zoom;
+    const mapY = (clientY - rect.top - (this._viewportEl.clientTop || 0) - this.panY) / this.zoom;
+    if (mapX < 0 || mapY < 0 || mapX > this.worldWidth || mapY > this.worldHeight) return null;
+    return {
+      x: Number((mapX / this.worldWidth * 100).toFixed(2)),
+      y: Number((mapY / this.worldHeight * 100).toFixed(2))
+    };
   }
 
   _filterIndex(query) {
@@ -324,18 +576,51 @@ export default class StrategicMapRenderer {
   }
 
   _getLabelPlacement(city, index, cities) {
-    const position = city.visualCoord || {};
-    if (position.labelPlacement) return position.labelPlacement;
-    if (position.x < 16) return 'right';
-    if (position.x > 84) return 'left';
-    if (position.y < 14) return 'bottom';
-    if (position.y > 86) return 'top';
+    void city;
+    void index;
+    void cities;
+    return 'top';
+  }
 
-    const nearbyBefore = cities.slice(0, index).filter(other => {
-      const otherPosition = other.visualCoord || {};
-      return Math.abs((otherPosition.x || 0) - position.x) < 13 && Math.abs((otherPosition.y || 0) - position.y) < 10;
-    }).length;
-    return nearbyBefore % 2 ? 'left' : 'right';
+  _layoutCityLabels() {
+    if (this.mode !== 'nation' || !this._rootEl) return;
+    const occupied = [];
+    const viewportWidth = this._viewportEl?.clientWidth || 700;
+    const viewportHeight = this._viewportEl?.clientHeight || 500;
+    const cities = this.nationData?.cities || [];
+    const cityById = new Map(cities.map(city => [city.id, city]));
+    const buttons = Array.from(this._rootEl.querySelectorAll('.ycm-nation-city'));
+
+    const overlaps = (a, b) => !(
+      a.right + 4 < b.left ||
+      a.left - 4 > b.right ||
+      a.bottom + 4 < b.top ||
+      a.top - 4 > b.bottom
+    );
+
+    buttons.forEach(button => {
+      const city = cityById.get(button.getAttribute('data-city-id'));
+      if (!city?.visualCoord) return;
+      const nameLength = Array.from(city.name || '').length;
+      const width = Math.max(42, 18 + nameLength * (city.id === this.nationData?.capital_city_id ? 18 : 16));
+      const height = city.id === this.nationData?.capital_city_id ? 30 : 28;
+      const markerX = this.panX + city.visualCoord.x / 100 * this.worldWidth * this.zoom;
+      const markerY = this.panY + city.visualCoord.y / 100 * this.worldHeight * this.zoom;
+      const rectangles = {
+        top: { left: markerX - width / 2, top: markerY - height - 25, right: markerX + width / 2, bottom: markerY - 25 },
+        'top-right': { left: markerX + 10, top: markerY - height - 18, right: markerX + width + 10, bottom: markerY - 18 },
+        'top-left': { left: markerX - width - 10, top: markerY - height - 18, right: markerX - 10, bottom: markerY - 18 },
+        'bottom-right': { left: markerX + 10, top: markerY + 18, right: markerX + width + 10, bottom: markerY + height + 18 },
+        'bottom-left': { left: markerX - width - 10, top: markerY + 18, right: markerX - 10, bottom: markerY + height + 18 }
+      };
+      const placement = LABEL_PLACEMENTS.find(candidate => {
+        const rect = rectangles[candidate];
+        const inside = rect.left >= 4 && rect.right <= viewportWidth - 4 && rect.top >= 4 && rect.bottom <= viewportHeight - 4;
+        return inside && !occupied.some(other => overlaps(rect, other));
+      }) || 'top';
+      button.setAttribute('data-label-placement', placement);
+      occupied.push(rectangles[placement]);
+    });
   }
 
   _syncSelected(type, id) {
@@ -360,11 +645,22 @@ export default class StrategicMapRenderer {
   resetView() {
     const vw = this._viewportEl?.clientWidth || 700;
     const vh = this._viewportEl?.clientHeight || 500;
-    this.fitZoom = Math.max(this.minZoom, Math.min(1, Math.min((vw - 12) / this.worldWidth, (vh - 12) / this.worldHeight)));
+    this.minZoom = this._calculateCoverMinZoom(vw, vh);
+    this.maxZoom = Math.max(2.2, this.minZoom * 2.5);
+    this.fitZoom = this.minZoom;
     this.zoom = this.fitZoom;
     this.panX = (vw - this.worldWidth * this.zoom) / 2;
     this.panY = (vh - this.worldHeight * this.zoom) / 2;
+    this._lastViewportWidth = vw;
+    this._lastViewportHeight = vh;
+    this._clampPan();
     this._updateTransform(true);
+  }
+
+  _calculateCoverMinZoom(viewportWidth, viewportHeight) {
+    const width = Math.max(1, Number(viewportWidth) || 1);
+    const height = Math.max(1, Number(viewportHeight) || 1);
+    return Math.max(width / this.worldWidth, height / this.worldHeight);
   }
 
   zoomIn() { this._zoomAtCenter(0.14); }
@@ -392,15 +688,60 @@ export default class StrategicMapRenderer {
     const vh = this._viewportEl?.clientHeight || 500;
     const scaledW = this.worldWidth * this.zoom;
     const scaledH = this.worldHeight * this.zoom;
-    const margin = 70;
-    this.panX = scaledW <= vw ? (vw - scaledW) / 2 : Math.min(margin, Math.max(vw - scaledW - margin, this.panX));
-    this.panY = scaledH <= vh ? (vh - scaledH) / 2 : Math.min(margin, Math.max(vh - scaledH - margin, this.panY));
+    this.panX = scaledW <= vw ? (vw - scaledW) / 2 : Math.min(0, Math.max(vw - scaledW, this.panX));
+    this.panY = scaledH <= vh ? (vh - scaledH) / 2 : Math.min(0, Math.max(vh - scaledH, this.panY));
   }
 
   _updateTransform(animated) {
     if (!this._worldEl) return;
     this._worldEl.classList.toggle('is-animated', !!animated && !this._isDragging);
     this._worldEl.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
+    this._worldEl.style.setProperty('--ycm-overlay-inverse-scale', String(1 / this.zoom));
+    this._layoutCityLabels();
+  }
+
+  _bindResizeObserver() {
+    if (!this._viewportEl) return;
+    const handleResize = () => this._handleResize();
+    if (typeof ResizeObserver === 'function') {
+      this._resizeObserver = new ResizeObserver(handleResize);
+      this._resizeObserver.observe(this._viewportEl);
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      this._windowResizeHandler = handleResize;
+      window.addEventListener('resize', handleResize);
+    }
+  }
+
+  _unbindResizeObserver() {
+    this._resizeObserver?.disconnect?.();
+    this._resizeObserver = null;
+    if (this._windowResizeHandler && typeof window !== 'undefined') {
+      window.removeEventListener('resize', this._windowResizeHandler);
+    }
+    this._windowResizeHandler = null;
+  }
+
+  _handleResize() {
+    if (!this._viewportEl) return;
+    const vw = this._viewportEl.clientWidth || 700;
+    const vh = this._viewportEl.clientHeight || 500;
+    if (vw === this._lastViewportWidth && vh === this._lastViewportHeight) return;
+    const previousWidth = this._lastViewportWidth || vw;
+    const previousHeight = this._lastViewportHeight || vh;
+    const centerMapX = (previousWidth / 2 - this.panX) / this.zoom;
+    const centerMapY = (previousHeight / 2 - this.panY) / this.zoom;
+    this.minZoom = this._calculateCoverMinZoom(vw, vh);
+    this.maxZoom = Math.max(2.2, this.minZoom * 2.5);
+    this.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoom));
+    this.fitZoom = this.minZoom;
+    this.panX = vw / 2 - centerMapX * this.zoom;
+    this.panY = vh / 2 - centerMapY * this.zoom;
+    this._lastViewportWidth = vw;
+    this._lastViewportHeight = vh;
+    this._clampPan();
+    this._updateTransform(false);
   }
 
   _bindEvents() {
@@ -428,7 +769,8 @@ export default class StrategicMapRenderer {
       this._setZoomAt(this.zoom + (event.deltaY < 0 ? 0.12 : -0.12), event.clientX - rect.left, event.clientY - rect.top);
     }, { passive: false });
     this._viewportEl.addEventListener('pointerdown', event => {
-      if (event.target?.closest?.('.ycm-map-controls')) return;
+      if (event.button !== undefined && event.button !== 0) return;
+      if (event.target?.closest?.(UI_CONTROL_SELECTOR)) return;
       this._isDragging = true;
       this._dragMoved = false;
       this._pointerStartX = event.clientX;
@@ -437,32 +779,39 @@ export default class StrategicMapRenderer {
       this._startY = event.clientY - this.panY;
       this._worldEl?.classList.remove('is-animated');
       this._viewportEl.classList.add('is-dragging');
-      this._captureEl = event.target || this._viewportEl;
+      this._captureEl = this._viewportEl;
       try { this._captureEl.setPointerCapture?.(event.pointerId); } catch (_) {}
     });
     this._viewportEl.addEventListener('pointermove', event => {
       if (!this._isDragging) return;
-      if (Math.abs(event.clientX - this._pointerStartX) > 3 || Math.abs(event.clientY - this._pointerStartY) > 3) this._dragMoved = true;
+      const deltaX = event.clientX - this._pointerStartX;
+      const deltaY = event.clientY - this._pointerStartY;
+      if (!this._dragMoved && Math.hypot(deltaX, deltaY) < DRAG_THRESHOLD_PX) return;
+      this._dragMoved = true;
       this.panX = event.clientX - this._startX;
       this.panY = event.clientY - this._startY;
       this._clampPan();
       this._updateTransform(false);
     });
-    const stopDrag = event => {
+    const stopDrag = (event, cancelled = false) => {
       if (!this._isDragging) return;
+      const wasMoved = this._dragMoved;
       this._isDragging = false;
       this._viewportEl.classList.remove('is-dragging');
       try { this._captureEl?.releasePointerCapture?.(event.pointerId); } catch (_) {}
       this._captureEl = null;
+      if (this.calibrationMode && !cancelled && !wasMoved) {
+        this._setCalibrationPoint(this._clientPointToVisualCoord(event.clientX, event.clientY));
+      }
     };
     this._viewportEl.addEventListener('pointerup', stopDrag);
-    this._viewportEl.addEventListener('pointercancel', stopDrag);
+    this._viewportEl.addEventListener('pointercancel', event => stopDrag(event, true));
   }
 
   _bindActivation(element, callback) {
     element.addEventListener('click', event => {
       event.stopPropagation();
-      if (!this._dragMoved) callback();
+      callback();
     });
   }
 
@@ -474,6 +823,7 @@ export default class StrategicMapRenderer {
   }
 
   destroy() {
+    this._unbindResizeObserver();
     if (this.container) this.container.innerHTML = '';
     this._rootEl = null;
     this._viewportEl = null;

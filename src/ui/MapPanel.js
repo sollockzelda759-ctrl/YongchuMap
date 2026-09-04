@@ -12,6 +12,7 @@ import StrategicMapRenderer from './StrategicMapRenderer.js';
 const UI_BTN_ID = 'yongchu-map-toggle-btn';
 const UI_FLOAT_BTN_ID = 'yongchu-map-floating-btn';
 const STORAGE_BTN_POS_KEY = 'yongchu_map_btn_pos_v1';
+const VISUAL_CALIBRATION_STORAGE_KEY = 'yongchu_map_visual_calibration_v1';
 
 const UI_MODAL_ID = 'yongchu-map-modal';
 const UI_STYLE_ID = 'yongchu-map-styles';
@@ -38,6 +39,11 @@ export default class MapPanel {
     this._reensureTimer = null;
     this._destroyed = false;
     this._renderGeneration = 0;
+    this._visualCalibrationEnabled = false;
+    try {
+      this._visualCalibrationEnabled = typeof localStorage !== 'undefined' &&
+        localStorage.getItem(VISUAL_CALIBRATION_STORAGE_KEY) === '1';
+    } catch (_) {}
 
     const initialState = this.store ? this.store.getState() : null;
     const configuredWorldId = this.mapInstance?.getActiveWorldPack?.()?.id ||
@@ -67,6 +73,24 @@ export default class MapPanel {
 
   setDataLoader(loader) {
     this.loader = loader;
+  }
+
+  async setVisualCalibrationMode(enabled) {
+    this._visualCalibrationEnabled = enabled === true;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        if (this._visualCalibrationEnabled) localStorage.setItem(VISUAL_CALIBRATION_STORAGE_KEY, '1');
+        else localStorage.removeItem(VISUAL_CALIBRATION_STORAGE_KEY);
+      }
+    } catch (_) {}
+    if (this._visible) await this.render();
+    return {
+      success: true,
+      enabled: this._visualCalibrationEnabled,
+      note: this._visualCalibrationEnabled
+        ? '进入国家地图后可点击底图标定；结果仅供复制，不会写入正式数据。'
+        : 'visualCoord 开发标定已关闭。'
+    };
   }
 
   init() {
@@ -744,6 +768,8 @@ export default class MapPanel {
       nationData: nationRef.nationData,
       artAssetUrl: nationRef.artAssetUrl,
       currentCityId,
+      calibrationMode: this._visualCalibrationEnabled,
+      onCalibrationNationChange: nationId => this.navigateToNation(nationId),
       onCityOpen: cityId => this.navigateToCity(cityId)
     });
     this._strategicMapRenderer.init();
@@ -823,7 +849,8 @@ export default class MapPanel {
     return {
       visible: this._visible,
       navState: { ...this.navState },
-      current_location: locName
+      current_location: locName,
+      visualCalibrationEnabled: this._visualCalibrationEnabled
     };
   }
 

@@ -101,6 +101,12 @@ async function runTests() {
   console.log('  current_location:', s0.current_location === '旧家宅邸' ? '✓' : '✗');
   console.log('  默认世界层级:', s0.navState.worldId === 'yongchu' ? '✓' : '✗');
   console.log('  默认无国家锁定:', s0.navState.nationId === null ? '✓' : '✗');
+  await panel.setVisualCalibrationMode(true);
+  assert.equal(panel.getState().visualCalibrationEnabled, true);
+  assert.equal(global.localStorage.getItem('yongchu_map_visual_calibration_v1'), '1');
+  await panel.setVisualCalibrationMode(false);
+  assert.equal(panel.getState().visualCalibrationEnabled, false);
+  console.log('  开发标定模式可显式开关且默认关闭: ✓');
 
   // 4. 模拟 DOM 容器以供 MapPanel 异步 render 验证
   global.document = {
@@ -361,6 +367,7 @@ async function runTests() {
     getAttribute(key) { return this.attributes[key] ?? null; }
     addEventListener(type, handler) { this.listeners[type] = handler; }
     removeEventListener(type) { delete this.listeners[type]; }
+    click() { this.listeners.click?.({ target: this, stopPropagation() {}, preventDefault() {} }); }
     remove() {
       if (this.parentNode) this.parentNode.children = this.parentNode.children.filter(child => child !== this);
     }
@@ -457,7 +464,78 @@ async function runTests() {
   console.log('  +、−、重置三控件完整存在、横排可见且全部绑定: ✓');
   selectionRenderer.destroy();
 
-  console.log('\n【测试10】独立可拖拽浮动按钮生命周期与防误触');
+  console.log('\n【测试10】战略地图缩放、拖拽与索引点击回归');
+  const expectedCoverScale = Math.max(700 / 1200, 500 / 900);
+  assert.equal(nationRenderer.minZoom, expectedCoverScale);
+  for (let i = 0; i < 20; i++) nationRenderer.zoomOut();
+  assert.equal(nationRenderer.zoom, expectedCoverScale, '缩小按钮不得突破动态 cover 最小缩放');
+  assert.equal(Number(nationMount.querySelector('.ycm-strategic-world').style['--ycm-overlay-inverse-scale']), 1 / nationRenderer.zoom);
+  assert.ok(cssSource.includes('scale(var(--ycm-overlay-inverse-scale, 1))'), 'Marker 与标签需以反向缩放保持屏幕尺寸稳定');
+  assert.ok(cssSource.includes('background: transparent !important') && cssSource.includes('.ycm-state-hotspot::before'), '国家热点必须隔离宿主 hover 背景和伪元素');
+  ['zhao_guo', 'yan', 'zhao', 'chu', 'liang', 'chen'].forEach(id => {
+    assert.ok(cssSource.includes(`[data-nation-id="${id}"]`), `${id} 应具备独立国家色`);
+  });
+  console.log('  cover 最小缩放、缩放下限、覆盖层反向缩放与六国色已锁定: ✓');
+
+  let cityClickCount = 0;
+  nationRenderer.onCityClick = () => { cityClickCount++; };
+  const indexButtons = nationMount.querySelectorAll('.ycm-strategic-index-item');
+  nationRenderer._dragMoved = true;
+  for (let i = 0; i < 30; i++) indexButtons[(i * 7) % indexButtons.length].click();
+  assert.equal(cityClickCount, 30, '地图曾拖动后，30 次索引点击仍须全部生效');
+  nationRenderer.render();
+  nationMount.querySelectorAll('.ycm-strategic-index-item')[4].click();
+  assert.equal(cityClickCount, 31, '重新渲染后索引点击仍须生效');
+  console.log('  30 次乱序索引点击与重新渲染点击均稳定: ✓');
+
+  const interactionViewport = nationMount.querySelector('.ycm-strategic-viewport');
+  interactionViewport.listeners.pointerdown({ button: 0, clientX: 100, clientY: 100, pointerId: 1, target: { closest: () => ({}) } });
+  assert.equal(nationRenderer._isDragging, false, 'UI 控件区域不得触发地图拖拽');
+  const backgroundTarget = { closest: () => null };
+  interactionViewport.listeners.pointerdown({ button: 0, clientX: 100, clientY: 100, pointerId: 2, target: backgroundTarget });
+  interactionViewport.listeners.pointermove({ clientX: 105, clientY: 105 });
+  assert.equal(nationRenderer._dragMoved, false, '8px 阈值内不得判定为拖拽');
+  interactionViewport.listeners.pointermove({ clientX: 109, clientY: 100 });
+  assert.equal(nationRenderer._dragMoved, true, '超过 8px 阈值应判定为拖拽');
+  interactionViewport.listeners.pointerup({ clientX: 109, clientY: 100, pointerId: 2 });
+  assert.equal(nationRenderer._isDragging, false);
+  console.log('  UI 点击不被拖拽窃取，8px 拖拽阈值明确生效: ✓');
+
+  console.log('\n【测试11】visualCoord 开发标定与坐标逆变换');
+  const calibrationMount = new FakeElement('div');
+  const calibrationRenderer = new StrategicMapRenderer({
+    container: calibrationMount,
+    mode: 'nation',
+    worldData: worldRef.worldData,
+    nationData: zhaoRef.nationData,
+    calibrationMode: true
+  });
+  calibrationRenderer.init();
+  assert.ok(calibrationMount.querySelector('.ycm-calibration-panel'));
+  assert.equal(calibrationRenderer.exportCalibrationJson().includes('"yongan": null'), true, '旧猜测坐标不得被当作标定结果导出');
+  const expectedPoint = { x: 52.35, y: 41.27 };
+  [[0.75, -123, -88], [1.6, -640, -330]].forEach(([zoom, panX, panY]) => {
+    calibrationRenderer.zoom = zoom;
+    calibrationRenderer.panX = panX;
+    calibrationRenderer.panY = panY;
+    const point = calibrationRenderer._clientPointToVisualCoord(
+      panX + expectedPoint.x / 100 * 1200 * zoom,
+      panY + expectedPoint.y / 100 * 900 * zoom
+    );
+    assert.deepEqual(point, expectedPoint, 'visualCoord 必须与缩放和平移无关');
+  });
+  calibrationRenderer._setCalibrationPoint(expectedPoint);
+  calibrationRenderer._confirmCalibrationPoint();
+  assert.deepEqual(JSON.parse(calibrationRenderer.exportCalibrationJson()).yongan, expectedPoint);
+  calibrationRenderer._stepCalibrationCity(1);
+  assert.equal(calibrationRenderer._calibrationCityId, zhaoRef.nationData.cities[1].id);
+  const placements = calibrationMount.querySelectorAll('.ycm-nation-city').map(item => item.getAttribute('data-label-placement'));
+  assert.ok(placements.every(value => ['top', 'top-right', 'top-left', 'bottom-right', 'bottom-left'].includes(value)));
+  console.log('  点击坐标在不同 zoom/pan 下恒定，预览/确认/前后切换/JSON 导出正常: ✓');
+  calibrationRenderer.destroy();
+  nationRenderer.destroy();
+
+  console.log('\n【测试12】独立可拖拽浮动按钮生命周期与防误触');
   let storageState = {};
   global.localStorage = {
     getItem(k) { return storageState[k] || null; },
@@ -545,7 +623,7 @@ async function runTests() {
 
   if (failedChecks > 0) throw new Error(`${failedChecks} 项 UI 检查失败`);
   console.log('\n========== UI 与 Data 联动测试总结 ==========');
-  console.log('所有 10 项测试及关键断言全部通过！');
+  console.log('所有 12 项测试及关键断言全部通过！');
   console.log('============================================');
 }
 
