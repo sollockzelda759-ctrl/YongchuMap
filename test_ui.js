@@ -401,11 +401,17 @@ async function runTests() {
   worldRenderer.init();
   const stateGlyphs = worldMount.querySelectorAll('.ycm-state-glyph').map(node => node.textContent);
   assert.deepEqual(stateGlyphs, ['昭', '燕', '赵', '楚', '梁', '陈']);
-  assert.equal(worldMount.querySelectorAll('[data-nation-id]').length, 6);
+  assert.equal(worldMount.querySelectorAll('.ycm-state-hotspot').length, 6);
+  assert.equal(worldMount.querySelectorAll('.ycm-world-region').length, 6, '世界静态边界层必须包含六国轮廓');
+  assert.equal(worldMount.querySelector('.ycm-world-border-layer').getAttribute('data-territory-authority'), 'static-reference-v1');
+  assert.equal(new Set(worldMount.querySelectorAll('.ycm-world-region').map(region => region.getAttribute('d'))).size, 6);
   assert.ok(worldMount.querySelector('.ycm-map-controls'), '世界层必须具备缩放/重置工具栏');
   assert.ok(worldMount.querySelector('.ycm-strategic-viewport').listeners.wheel, '世界层必须绑定滚轮缩放');
   assert.ok(!worldMount.querySelector('.ycm-strategic-world').querySelectorAll('.ycm-state-glyph').some(node => node.textContent.startsWith('大')));
-  console.log('  世界地图六国仅渲染单字国号且六区可交互: ✓');
+  const worldIndexNames = worldMount.querySelectorAll('[data-index-nation-id]').map(item => item.querySelector('strong')?.textContent);
+  assert.deepEqual(worldIndexNames, ['昭国', '燕国', '赵国', '楚国', '梁国', '陈国']);
+  assert.ok(!worldIndexNames.some(name => name?.startsWith('大')));
+  console.log('  世界地图六国单字国号、静态边界层与正式国家称谓正常: ✓');
 
   const nationMount = new FakeElement('div');
   const nationRenderer = new StrategicMapRenderer({ container: nationMount, mode: 'nation', worldData: worldRef.worldData, nationData: zhaoRef.nationData, currentCityId: 'yongan' });
@@ -420,6 +426,7 @@ async function runTests() {
   nationRenderer.selectCity('yongan');
   assert.ok(nationMount.querySelector('[data-city-id="yongan"]').classList.contains('is-selected'));
   assert.ok(nationMount.querySelector('[data-index-city-id="yongan"]').classList.contains('is-selected'));
+  assert.equal(nationMount.querySelector('.ycm-map-section-title').textContent, '昭国 · 山河城邑');
   console.log('  昭国地图从正式数据渲染 13 城，选中态与当前位置独立: ✓');
 
   const artPaths = [
@@ -489,9 +496,20 @@ async function runTests() {
   console.log('  30 次乱序索引点击与重新渲染点击均稳定: ✓');
 
   const interactionViewport = nationMount.querySelector('.ycm-strategic-viewport');
+  let wheelPrevented = false;
+  let wheelStopped = false;
+  interactionViewport.listeners.wheel({
+    deltaY: -1,
+    clientX: 350,
+    clientY: 250,
+    preventDefault() { wheelPrevented = true; },
+    stopPropagation() { wheelStopped = true; }
+  });
+  assert.ok(wheelPrevented && wheelStopped, '地图滚轮必须阻止主面板滚动与事件冒泡');
   interactionViewport.listeners.pointerdown({ button: 0, clientX: 100, clientY: 100, pointerId: 1, target: { closest: () => ({}) } });
   assert.equal(nationRenderer._isDragging, false, 'UI 控件区域不得触发地图拖拽');
   const backgroundTarget = { closest: () => null };
+  const placementsBeforeDrag = nationMount.querySelectorAll('.ycm-nation-city').map(item => item.getAttribute('data-label-placement'));
   interactionViewport.listeners.pointerdown({ button: 0, clientX: 100, clientY: 100, pointerId: 2, target: backgroundTarget });
   interactionViewport.listeners.pointermove({ clientX: 105, clientY: 105 });
   assert.equal(nationRenderer._dragMoved, false, '8px 阈值内不得判定为拖拽');
@@ -499,7 +517,10 @@ async function runTests() {
   assert.equal(nationRenderer._dragMoved, true, '超过 8px 阈值应判定为拖拽');
   interactionViewport.listeners.pointerup({ clientX: 109, clientY: 100, pointerId: 2 });
   assert.equal(nationRenderer._isDragging, false);
-  console.log('  UI 点击不被拖拽窃取，8px 拖拽阈值明确生效: ✓');
+  const placementsAfterDrag = nationMount.querySelectorAll('.ycm-nation-city').map(item => item.getAttribute('data-label-placement'));
+  assert.deepEqual(placementsAfterDrag, placementsBeforeDrag, '平移不得重新安排标签方位');
+  assert.ok(cssSource.includes('.ycm-body.ycm-body-strategic') && cssSource.includes('overflow: hidden'));
+  console.log('  滚轮不冒泡、UI 点击不被拖拽窃取、标签平移不跳位: ✓');
 
   console.log('\n【测试11】visualCoord 开发标定与坐标逆变换');
   const calibrationMount = new FakeElement('div');

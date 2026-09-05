@@ -4,6 +4,8 @@
 // 本文件中的百分比坐标仅用于非权威视觉布局，不供路线/旅行逻辑使用。
 // ============================================================
 
+import { getNationDisplayName } from './MapPresentation.js';
+
 const WORLD_LAYOUT = {
   yan:       { x: 49, y: 19, width: 34, height: 27 },
   liang:     { x: 18, y: 49, width: 28, height: 35 },
@@ -22,6 +24,16 @@ const MAP_ASSETS = {
   liang: new URL('../../assets/maps/yongchu/nations/liang.png', import.meta.url).href,
   chen: new URL('../../assets/maps/yongchu/nations/chen.png', import.meta.url).href
 };
+
+// 依据已确认六国参考图手工描摹的静态边界。仅用于世界层视觉识别，不代表动态领土权威。
+const WORLD_BORDER_REGIONS = Object.freeze({
+  yan: 'M330 40 C410 18 560 20 680 34 C760 46 830 84 900 130 C862 160 826 197 780 226 C734 260 690 294 632 300 C560 302 518 284 462 264 C415 247 382 222 354 190 C330 162 315 112 330 40 Z',
+  liang: 'M40 145 C120 110 220 115 315 125 C324 158 340 180 354 190 C385 220 415 246 462 264 C438 300 424 342 434 378 C440 420 425 465 405 505 C370 550 330 588 280 615 C210 606 150 575 100 535 C60 475 40 390 34 300 C28 235 30 185 40 145 Z',
+  zhao_guo: 'M462 264 C520 282 565 300 632 300 C700 295 770 310 820 345 C846 375 860 408 865 430 C840 465 825 505 800 540 C784 568 772 592 785 610 C720 632 660 624 610 610 C555 596 520 570 472 540 C442 522 420 512 405 505 C425 465 440 420 434 378 C428 340 440 300 462 264 Z',
+  zhao: 'M900 130 C970 120 1050 145 1110 190 C1150 235 1164 292 1150 350 C1135 405 1090 440 1010 470 C955 475 915 458 865 430 C860 408 846 375 820 345 C800 310 790 266 780 226 C826 197 862 160 900 130 Z',
+  chu: 'M280 615 C330 588 370 550 405 505 C420 512 442 522 472 540 C520 570 555 596 610 610 C660 624 720 632 785 610 C800 660 820 710 805 760 C780 820 720 860 640 875 C520 900 400 880 310 830 C250 790 220 720 230 670 C240 640 260 620 280 615 Z',
+  chen: 'M865 430 C915 458 955 475 1010 470 C1070 480 1120 520 1150 580 C1160 640 1130 700 1080 745 C1020 800 940 835 855 820 C810 780 790 720 800 660 C805 635 795 620 785 610 C772 592 784 568 800 540 C825 505 840 465 865 430 Z'
+});
 
 const DRAG_THRESHOLD_PX = 8;
 const LABEL_PLACEMENTS = ['top', 'top-right', 'top-left', 'bottom-right', 'bottom-left'];
@@ -79,6 +91,7 @@ export default class StrategicMapRenderer {
     this._calibrationCityId = this.nationData?.cities?.[0]?.id || null;
     this._calibrationPending = null;
     this._calibrationDrafts = new Map();
+    this._labelsLaidOut = false;
   }
 
   init() {
@@ -87,6 +100,7 @@ export default class StrategicMapRenderer {
 
   render() {
     this._unbindResizeObserver();
+    this._labelsLaidOut = false;
     this.container.innerHTML = '';
     const root = document.createElement('section');
     root.className = `ycm-strategic-map ycm-strategic-mode-${this.mode}`;
@@ -99,7 +113,7 @@ export default class StrategicMapRenderer {
     title.className = 'ycm-map-section-title';
     title.textContent = this.mode === 'world'
       ? `${this.worldData?.name || '天下'} · 六国舆图`
-      : `${this.nationData?.full_name || this.nationData?.name || '本国'} · 山河城邑`;
+      : `${getNationDisplayName(this.nationData)} · 山河城邑`;
     const note = document.createElement('div');
     note.className = 'ycm-map-section-note';
     note.textContent = '底图与交互层分离 · visualCoord 仅用于百分比显示';
@@ -111,7 +125,9 @@ export default class StrategicMapRenderer {
     layout.className = 'ycm-strategic-layout';
     const viewport = document.createElement('div');
     viewport.className = 'ycm-strategic-viewport';
-    viewport.setAttribute('aria-label', this.mode === 'world' ? '永初大陆六国地图' : `${this.nationData?.name || '国家'}城邑地图`);
+    viewport.setAttribute('aria-label', this.mode === 'world'
+      ? '永初大陆六国地图'
+      : `${getNationDisplayName(this.nationData, '国家')}城邑地图`);
     this._viewportEl = viewport;
 
     const mapWorld = document.createElement('div');
@@ -133,7 +149,7 @@ export default class StrategicMapRenderer {
     cartouche.className = 'ycm-map-cartouche';
     cartouche.textContent = this.mode === 'world'
       ? '永初大陆 · 山河万里'
-      : `${this.nationData?.name || '本国'}国疆域 · 城邑相连`;
+      : `${getNationDisplayName(this.nationData)}疆域 · 城邑相连`;
     viewport.appendChild(cartouche);
 
     const drawer = document.createElement('aside');
@@ -192,6 +208,7 @@ export default class StrategicMapRenderer {
   }
 
   _renderWorld(mapWorld) {
+    this._renderWorldBorderLayer(mapWorld);
     const overlay = document.createElement('div');
     overlay.className = 'ycm-world-overlay';
     (this.worldData?.nations || []).forEach(nation => {
@@ -201,7 +218,7 @@ export default class StrategicMapRenderer {
       button.type = 'button';
       button.className = 'ycm-state-hotspot';
       button.setAttribute('data-nation-id', nation.id);
-      button.setAttribute('aria-label', `查看${nation.fullName || nation.name}`);
+      button.setAttribute('aria-label', `查看${getNationDisplayName(nation)}`);
       this._positionElement(button, position);
       const halo = document.createElement('span');
       halo.className = 'ycm-state-halo';
@@ -221,6 +238,24 @@ export default class StrategicMapRenderer {
       overlay.appendChild(button);
     });
     mapWorld.appendChild(overlay);
+  }
+
+  _renderWorldBorderLayer(mapWorld) {
+    const namespace = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(namespace, 'svg');
+    svg.classList.add('ycm-world-border-layer');
+    svg.setAttribute('viewBox', `0 0 ${this.worldWidth} ${this.worldHeight}`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('data-territory-authority', 'static-reference-v1');
+    Object.entries(WORLD_BORDER_REGIONS).forEach(([nationId, pathData]) => {
+      const path = document.createElementNS(namespace, 'path');
+      path.classList.add('ycm-world-region');
+      path.setAttribute('data-nation-id', nationId);
+      path.setAttribute('d', pathData);
+      svg.appendChild(path);
+    });
+    mapWorld.appendChild(svg);
   }
 
   _renderNation(mapWorld) {
@@ -279,7 +314,7 @@ export default class StrategicMapRenderer {
       button.setAttribute('data-search-text', `${record.name || ''} ${record.fullName || ''} ${record.type || ''}`.toLowerCase());
       if (this.mode === 'nation' && record.id === this.currentCityId) button.classList.add('is-current-pos');
       const name = document.createElement('strong');
-      name.textContent = this.mode === 'world' ? (record.fullName || record.name) : record.name;
+      name.textContent = this.mode === 'world' ? getNationDisplayName(record) : record.name;
       const meta = document.createElement('span');
       meta.textContent = this.mode === 'world'
         ? (record.geographicPosition || '地理资料待考')
@@ -343,7 +378,7 @@ export default class StrategicMapRenderer {
     controls.className = 'ycm-calibration-controls';
     const nationSelect = this._createCalibrationSelect('国家', (this.worldData?.nations || []).map(nation => ({
       value: nation.id,
-      label: nation.fullName || nation.name
+      label: getNationDisplayName(nation)
     })), this.nationData?.id);
     nationSelect.select.addEventListener('change', () => {
       if (nationSelect.select.value !== this.nationData?.id) this.onCalibrationNationChange?.(nationSelect.select.value);
@@ -543,7 +578,7 @@ export default class StrategicMapRenderer {
 
     const title = document.createElement('strong');
     title.className = 'ycm-strategic-detail-title';
-    title.textContent = this.mode === 'world' ? (record.fullName || record.name) : record.name;
+    title.textContent = this.mode === 'world' ? getNationDisplayName(record) : record.name;
     this._detailEl.appendChild(title);
 
     const fields = this.mode === 'world'
@@ -582,8 +617,8 @@ export default class StrategicMapRenderer {
     return 'top';
   }
 
-  _layoutCityLabels() {
-    if (this.mode !== 'nation' || !this._rootEl) return;
+  _layoutCityLabels(force = false) {
+    if (this.mode !== 'nation' || !this._rootEl || (this._labelsLaidOut && !force)) return;
     const occupied = [];
     const viewportWidth = this._viewportEl?.clientWidth || 700;
     const viewportHeight = this._viewportEl?.clientHeight || 500;
@@ -621,6 +656,7 @@ export default class StrategicMapRenderer {
       button.setAttribute('data-label-placement', placement);
       occupied.push(rectangles[placement]);
     });
+    this._labelsLaidOut = true;
   }
 
   _syncSelected(type, id) {
@@ -655,6 +691,7 @@ export default class StrategicMapRenderer {
     this._lastViewportHeight = vh;
     this._clampPan();
     this._updateTransform(true);
+    this._layoutCityLabels(true);
   }
 
   _calculateCoverMinZoom(viewportWidth, viewportHeight) {
@@ -697,7 +734,6 @@ export default class StrategicMapRenderer {
     this._worldEl.classList.toggle('is-animated', !!animated && !this._isDragging);
     this._worldEl.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
     this._worldEl.style.setProperty('--ycm-overlay-inverse-scale', String(1 / this.zoom));
-    this._layoutCityLabels();
   }
 
   _bindResizeObserver() {
@@ -742,6 +778,7 @@ export default class StrategicMapRenderer {
     this._lastViewportHeight = vh;
     this._clampPan();
     this._updateTransform(false);
+    this._layoutCityLabels(true);
   }
 
   _bindEvents() {
@@ -765,6 +802,7 @@ export default class StrategicMapRenderer {
     }
     this._viewportEl.addEventListener('wheel', event => {
       event.preventDefault();
+      event.stopPropagation();
       const rect = this._viewportEl.getBoundingClientRect();
       this._setZoomAt(this.zoom + (event.deltaY < 0 ? 0.12 : -0.12), event.clientX - rect.left, event.clientY - rect.top);
     }, { passive: false });

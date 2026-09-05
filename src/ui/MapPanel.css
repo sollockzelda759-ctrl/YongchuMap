@@ -1319,17 +1319,43 @@
   display: none !important;
 }
 .ycm-state-hotspot[data-nation-id="zhao_guo"],
+.ycm-world-region[data-nation-id="zhao_guo"],
 .ycm-strategic-index-item[data-index-nation-id="zhao_guo"] { --ycm-nation-color: #d2a54d; --ycm-nation-rgb: 210, 165, 77; }
 .ycm-state-hotspot[data-nation-id="yan"],
+.ycm-world-region[data-nation-id="yan"],
 .ycm-strategic-index-item[data-index-nation-id="yan"] { --ycm-nation-color: #7f9fb1; --ycm-nation-rgb: 127, 159, 177; }
 .ycm-state-hotspot[data-nation-id="zhao"],
+.ycm-world-region[data-nation-id="zhao"],
 .ycm-strategic-index-item[data-index-nation-id="zhao"] { --ycm-nation-color: #a17a66; --ycm-nation-rgb: 161, 122, 102; }
 .ycm-state-hotspot[data-nation-id="chu"],
+.ycm-world-region[data-nation-id="chu"],
 .ycm-strategic-index-item[data-index-nation-id="chu"] { --ycm-nation-color: #739b78; --ycm-nation-rgb: 115, 155, 120; }
 .ycm-state-hotspot[data-nation-id="liang"],
+.ycm-world-region[data-nation-id="liang"],
 .ycm-strategic-index-item[data-index-nation-id="liang"] { --ycm-nation-color: #b9965e; --ycm-nation-rgb: 185, 150, 94; }
 .ycm-state-hotspot[data-nation-id="chen"],
+.ycm-world-region[data-nation-id="chen"],
 .ycm-strategic-index-item[data-index-nation-id="chen"] { --ycm-nation-color: #62a09d; --ycm-nation-rgb: 98, 160, 157; }
+.ycm-world-border-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.ycm-world-region {
+  fill: rgba(var(--ycm-nation-rgb, 201, 167, 66), .065);
+  stroke: rgba(var(--ycm-nation-rgb, 201, 167, 66), .82);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 4px rgba(var(--ycm-nation-rgb, 201, 167, 66), .38));
+}
+.ycm-world-overlay { z-index: 3; pointer-events: none; }
+.ycm-world-overlay .ycm-state-hotspot { pointer-events: auto; }
 .ycm-state-halo {
   position: absolute;
   inset: 7%;
@@ -1787,4 +1813,39 @@
 @media (prefers-reduced-motion: reduce) {
   .ycm-strategic-world.is-animated,
   .ycm-map-world.is-animated { transition: none; }
+}
+
+/* 战略地图占满面板可用高度；主面板不参与滚动，只有右侧索引自行滚动。 */
+#yongchu-map-modal,
+.ycm-body.ycm-body-strategic {
+  overscroll-behavior: none;
+}
+.ycm-body.ycm-body-strategic {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.ycm-body-strategic .ycm-current-status {
+  flex: 0 0 auto;
+  margin-bottom: 12px;
+}
+.ycm-body-strategic .ycm-strategic-map-mount {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.ycm-body-strategic .ycm-strategic-map {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.ycm-body-strategic .ycm-strategic-layout {
+  height: auto;
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .ycm-body-strategic .ycm-strategic-viewport { min-height: 0; }
+  .ycm-body-strategic .ycm-strategic-drawer { flex-basis: 140px; }
 }

@@ -7,6 +7,7 @@
 import MapDataLoader from '../data/MapDataLoader.js';
 import YonganCityMapRenderer from './YonganCityMapRenderer.js';
 import StrategicMapRenderer from './StrategicMapRenderer.js';
+import { getNationDisplayName } from './MapPresentation.js';
 
 
 const UI_BTN_ID = 'yongchu-map-toggle-btn';
@@ -619,6 +620,13 @@ export default class MapPanel {
 
     if (!breadcrumbContainer || !bodyContent) return { success: false };
 
+    if (this.navState.cityId) {
+      bodyContent.classList.remove('ycm-body-strategic');
+    } else {
+      bodyContent.classList.add('ycm-body-strategic');
+      bodyContent.scrollTop = 0;
+    }
+
     this._renderBreadcrumbs(breadcrumbContainer, backBtn);
 
     if (this.navState.cityId) {
@@ -644,9 +652,10 @@ export default class MapPanel {
     });
 
     if (this.navState.nationId) {
-      const nationLabel = this._currentNationRef?.nationMeta?.fullName ||
-                          this._currentNationRef?.nationMeta?.name ||
-                          this.navState.nationId;
+      const nationLabel = getNationDisplayName(
+        this._currentNationRef?.nationMeta || this.navState.nationId,
+        this.navState.nationId
+      );
       items.push({
         label: nationLabel,
         active: !this.navState.cityId,
@@ -694,7 +703,7 @@ export default class MapPanel {
     const cityName = phys.city_id
       ? (loadedCity?.id === phys.city_id ? loadedCity.name : (this._cityNameCache.get(phys.city_id) || phys.city_id))
       : '未记录';
-    const nationName = phys.nation || loadedNation?.fullName || loadedNation?.name || '未记录';
+    const nationName = getNationDisplayName(phys.nation || loadedNation, '未记录');
 
     return `
       <div class="ycm-current-status">
@@ -733,7 +742,7 @@ export default class MapPanel {
     this._destroyStrategicRenderer();
     const nationRef = this._currentNationRef;
     const bannerHtml = this._renderCurrentLocationBanner();
-    const fullName = nationRef?.nationMeta?.fullName || nationRef?.nationMeta?.name || '该国';
+    const fullName = getNationDisplayName(nationRef?.nationMeta, '该国');
 
     if (!nationRef || !nationRef.hasDetail) {
       container.innerHTML = `
